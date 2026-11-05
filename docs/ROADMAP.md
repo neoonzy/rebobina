@@ -6,6 +6,8 @@ Este roadmap apresenta as etapas amplas. A divisão operacional em ciclos, taref
 
 As etapas diferenciam protótipo host, simulação e firmware experimental. Nada neste repositório está pronto para instalação em câmera.
 
+**Estado atual:** fundação host concluída; investigação da 5D Classic em andamento; Sprint 2 parcialmente implementada (objetos ARM, interface host); provas de módulos e estabilidade no Linux host; nenhuma versão de câmera disponível.
+
 ## Etapa 0 — Fundação
 
 - [x] Definir o escopo da 5D Classic (1.1.1) e o propósito modular;

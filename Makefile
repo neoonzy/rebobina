@@ -58,6 +58,10 @@ test-plugins: build/rebobina-plugin-host build/plugins/hello.so build/plugins/in
 plugin-demo: build/rebobina-plugin-host build/plugins/hello.so
 	./build/rebobina-plugin-host ./build/plugins/hello.so
 
+build/test-ui-stress: tests/test_ui_stress.c src/core/ui.c include/rebobina/ui.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ tests/test_ui_stress.c src/core/ui.c
+
 build/arm/registry.o: src/core/registry.c include/rebobina/module.h
 	@mkdir -p build/arm
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
@@ -90,9 +94,10 @@ check-modules:
 audit-platform:
 	python3 tools/platform_audit.py check
 
-test: build/test-registry build/test-ui test-plugins
+test: build/test-registry build/test-ui build/test-ui-stress test-plugins
 	./build/test-registry
 	./build/test-ui
+	./build/test-ui-stress
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:

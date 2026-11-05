@@ -23,12 +23,15 @@ O Magic Lantern já possui um sistema de módulos em várias versões. O Rebobin
 ## O que já funciona nesta versão inicial
 
 - Um **protótipo do registro de módulos em C**, executado no computador;
+- Um **simulador de interface em terminal**, com menu e eventos de botões;
+- Objetos relocáveis para **ARM946E-S**, sem firmware instalável;
+- Uma **prova de módulos externos `.so` no Linux host**, sem suporte a câmera;
 - Contrato inicial de API com verificação de versão, identificador e ciclo de vida;
 - Exemplo `hello`, que demonstra inicialização e encerramento de módulo;
 - Manifestos JSON validados por ferramenta Python, incluindo um *placeholder* do Soup Engine;
 - Testes do registro e dos manifestos, com CI no GitHub Actions.
 
-**Ainda não existe o executável embarcado do Rebobina: não há inicialização própria na câmera, carregamento dinâmico, menu na câmera, suporte a `.mo`, isolamento de módulos, instalação ou integração funcional com o Soup Engine.** Os manifestos descrevem intenções e compatibilidade planejada, não permissões efetivamente impostas.
+**Ainda não existe um executável embarcado do Rebobina:** não há inicialização própria na câmera, menu na câmera, carregador ARM de módulos, suporte a `.mo`, isolamento, instalação ou integração funcional com o Soup Engine. Há apenas carregamento experimental de `.so` no **Linux host**.** Os manifestos descrevem intenções e compatibilidade planejada, não permissões efetivamente impostas.
 
 ## Estrutura
 
@@ -45,7 +48,7 @@ docs/                 Arquitetura, segurança e roteiro
 
 ## Desenvolvimento atual e próximo marco
 
-A Sprint 1 está em andamento: já existe um mapa preliminar dos hooks, da ROM e da memória da EOS 5D Classic, mas o executável Magic Lantern 2012 de referência continua sem hash verificado. O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. A próxima prioridade é analisar a inicialização do Magic Lantern na 5D e criar a primeira versão embarcada mínima do Rebobina, primeiro em ambiente de testes e depois em câmera de desenvolvimento. Um instalador desktop não é requisito para iniciar essa etapa.
+A Sprint 0 foi concluída como fundação host e a Sprint 2 está em desenvolvimento. A Sprint 1 permanece aberta por dependências históricas: já existe um mapa preliminar dos hooks, da ROM e da memória da EOS 5D Classic, mas o executável Magic Lantern 2012 de referência continua sem hash verificado. O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. A próxima prioridade é analisar a inicialização do Magic Lantern na 5D e criar a primeira versão embarcada mínima do Rebobina, primeiro em ambiente de testes e depois em câmera de desenvolvimento. Um instalador desktop não é requisito para iniciar essa etapa.
 
 ## Primeiros comandos
 
@@ -56,6 +59,9 @@ make demo          # compila e executa o protótipo C no computador
 make test          # testa o registro C e a ferramenta Python
 make check-modules # valida manifestos
 make audit-platform # verifica consistência do inventário estático da 5D
+make arm-objects    # compila objetos ARM (NÃO firmware)
+make sim-ui         # simula navegação no terminal
+make plugin-demo    # carrega um .so confiável no Linux host
 python3 tools/modules.py list
 python3 tools/modules.py new minha-extensao --name "Minha extensão"
 ```
@@ -78,6 +84,12 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 
 - [Arquitetura proposta](docs/ARQUITETURA.md)
 - [Sprint 1: levantamento da Canon 5D Classic](docs/5DC-PLATAFORMA.md)
+- [Sprint 2: compilação ARM e interface host](docs/SPRINT2-BASE.md)
+- [Sprint 3: condições para primeiro boot](docs/SPRINT3-CHECKLIST.md)
+- [Sprint 5: protótipo de módulos no Linux host](docs/SPRINT5-PROTOTIPO.md)
+- [Sprint 6: plano de integração Soup Engine](docs/SPRINT6-SOUP-PORT.md)
+- [Sprint 7: testes de estabilidade](docs/SPRINT7-TESTES.md)
+- [Sprint 8: distribuição futura](docs/SPRINT8-DISTRIBUICAO.md)
 - [Sprint 1: relatório de testes](docs/SPRINT1-TESTES.md)
 - [Sprint 1: evidências e fontes](docs/REFERENCIAS-SPRINT1.md)
 - [Contrato e criação de módulos](docs/MODULOS.md)

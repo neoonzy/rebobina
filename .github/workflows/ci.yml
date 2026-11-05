@@ -26,3 +26,12 @@ jobs:
           make plugin-demo
           make sim-ui
           make arm-objects
+
+  undefined-behavior:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Executar testes host com UBSan (Linux)
+        run: |
+          make test CC=clang CFLAGS='-std=c11 -O1 -g -Wall -Wextra -Werror -pedantic -Iinclude -fsanitize=undefined -fno-sanitize-recover=all'
+

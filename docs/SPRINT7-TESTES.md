@@ -12,7 +12,7 @@ Os testes atuais ainda são **host**, não testes de estresse numa Canon real.
 
 ## Futuras verificações obrigatórias
 
-- [ ] Valgrind/ASan/UBSan e cobertura dos componentes host onde suportados.
+- [x] Acrescentar execução de UBSan para os componentes host no CI (acompanhar o resultado do workflow antes de considerar validado); cobertura e ASan ainda pendentes.
 - [ ] Interrupções de I/O, card cheio, leitura parcial, falhas de alocação, suspend/resume (simulado).
 - [ ] Isolamento de filas de eventos de câmera e menu, sem trabalho de I/O em callback de botões.
 - [ ] Medição de pilhas e memória de módulos em hardware.

@@ -27,7 +27,7 @@ Canon EOS 5D Classic (arquitetura pretendida)
 Computador: testes, simulador e ferramenta auxiliar de instalação
 ```
 
-O componente realmente implementado hoje é um **protótipo de registro de módulos em C no computador** (`src/core/registry.c`). O restante é arquitetura-alvo.
+Componentes implementados no computador: **registro de módulos** (`src/core/registry.c`), **modelo de interface** (`src/core/ui.c`), simulador terminal (`src/host/menu_sim.c`) e carregador **Linux host** de bibliotecas `.so` (`src/host/plugin_loader.c`). A compilação ARM produz objetos relocáveis, não um executável. O **bootstrap, HAL Canon, carregador embarcado e tela física** permanecem arquitetura-alvo.
 
 ## Separação de responsabilidades
 

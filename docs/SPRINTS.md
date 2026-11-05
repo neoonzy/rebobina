@@ -10,14 +10,14 @@
 
 | Sprint | Foco | Entrega principal | Estado |
 | --- | --- | --- | --- |
-| **0** | Fundação | Repositório, API protótipo, manifesto, CI e documentação | Parcialmente concluída |
+| **0** | Fundação | Repositório, API protótipo, manifesto, CI e documentação | **Concluída no escopo host** |
 | **1** | Engenharia reversa e especificação | Mapa de boot, APIs, memória e decisões de reaproveitamento GPLv2 da 5D | **Em andamento: levantamento e testes offline realizados; binário-base ainda não identificado** |
-| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | A fazer |
+| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Em andamento: objetos ARM e simulador de interface host funcionando** |
 | **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | A fazer; depende de hardware |
 | **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | A fazer |
-| **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | A fazer |
+| **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | **Prova antecipada: plugin .so no Linux; câmera pendente** |
 | **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | A fazer |
-| **7** | Confiabilidade | Testes de interrupção, memória, compatibilidade e recuperação | A fazer |
+| **7** | Confiabilidade | Testes de interrupção, memória, compatibilidade e recuperação | **Testes host antecipados; testes reais pendentes** |
 | **8** | Distribuição | Releases por firmware e instalador auxiliar seguro | A fazer |
 | **9** | Ecossistema | SDK público, módulos extras e estudo de outras Canon | Futuro |
 
@@ -29,10 +29,10 @@
 - [x] Implementar registro de módulos em C para **host** e módulo de demonstração.
 - [x] Definir manifesto JSON experimental, CLI de criação e validação.
 - [x] Adicionar testes C/Python e CI; a execução inicial no GitHub Actions passou.
-- [ ] Especificar versionamento do núcleo, ABI, módulos e releases.
-- [ ] Criar `CHANGELOG.md` e templates de issue/PR.
+- [x] Documentar versionamento do núcleo, ABI, módulos e releases em [VERSIONAMENTO.md](VERSIONAMENTO.md).
+- [x] Criar `CHANGELOG.md` e templates de issue/PR.
 
-**Concluída quando:** política de versões e rastreabilidade documentadas; CI host verde. **A situação atual é parcialmente concluída.**
+**Concluída quando:** política de versões e rastreabilidade documentadas; CI host verde. **Conclusão: cumprida para a fundação host**, sem qualquer entrega embarcada.
 
 ## Sprint 1 — Entender a EOS 5D e o Magic Lantern
 
@@ -54,14 +54,16 @@
 
 ## Sprint 2 — Toolchain e ambiente de testes ARM
 
+**Progresso:** compilação `arm-none-eabi` via Clang apenas de **objetos relocáveis ARM946E-S**, menu portável e simulador de interface host. Consulte [SPRINT2-BASE.md](SPRINT2-BASE.md). Não há linker executável nem simulação do sistema Canon.
+
 **Objetivo:** compilar o projeto para a arquitetura da 5D sem ainda declarar suporte ao hardware.
 
-- [ ] Criar alvos de build ARM946E-S e linker script base, derivados de estudos verificados da plataforma.
-- [ ] Separar `host` de `camera/5DC.111` e explicitar o que é simulado.
+- [x] Criar alvos de compilação de objetos ARM946E-S no host; **linker script base permanece pendente** até validação de memória.
+- [x] Separar os protótipos host de `camera/5DC.111`, explicitando que só objetos são compilados.
 - [ ] Implementar stubs ou simulador mínimo para chamadas da HAL.
 - [ ] Validar dependências externas, tamanho de imagem, seções, ABI e limites de memória na compilação.
-- [ ] Automatizar testes da HAL e do ciclo de vida sob host.
-- [ ] Registrar ferramentas e versões para builds reproduzíveis.
+- [x] Automatizar testes de interface e ciclo de vida sob host; HAL Canon ainda pendente.
+- [x] Registrar Clang/CPU alvo e verificação ELF; **a reprodutibilidade binária total da câmera ainda está pendente**.
 
 **Entregável:** primeiro artefato ARM **experimental**, junto a relatórios de compilação e verificações automáticas.
 
@@ -96,6 +98,8 @@
 
 ## Sprint 5 — Sistema de extensões embarcadas
 
+**Progresso antecipado:** prova no Linux host de carregamento independente via `dlopen`, com testes positivos e negativos de ABI. **Não é o carregador da câmera.** Consulte [SPRINT5-PROTOTIPO.md](SPRINT5-PROTOTIPO.md).
+
 **Objetivo:** adicionar funcionalidades sem alterar o executável principal a cada integração.
 
 - [ ] Definir ABI embarcada versionada, APIs compartilhadas e convenções de recursos.
@@ -121,6 +125,8 @@
 **Aceite:** módulo integrado ao menu Rebobina, processando amostras em simulação e depois em câmera, com comparação de saída e integridade dos RAWs.
 
 ## Sprint 7 — Estabilidade e recuperação
+
+**Progresso antecipado:** testes de fronteira e 100 mil eventos de interface no host, além de testes negativos de plugins; [plano de testes](SPRINT7-TESTES.md). Ainda sem hardware.
 
 **Objetivo:** reduzir regressões e tornar o software adequado a testes repetidos.
 

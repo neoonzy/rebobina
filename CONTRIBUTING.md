@@ -10,6 +10,9 @@ Você precisa de um compilador C11, `make` e Python >= 3.9.
 make demo
 make test
 make check-modules
+make audit-platform
+make arm-objects   # compilação de objetos, NÃO firmware
+make sim-ui        # simulador de interface no terminal
 ```
 
 Antes de enviar alterações, documente o propósito, os arquivos alterados, os comandos realmente executados e suas saídas. Não descreva testes não executados como aprovados.
