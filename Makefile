@@ -49,10 +49,10 @@ build/plugins/no-export.so: tests/fixtures/no_export_plugin.c
 
 test-plugins: build/rebobina-plugin-host build/plugins/hello.so build/plugins/invalid-abi.so build/plugins/no-export.so
 	./build/rebobina-plugin-host ./build/plugins/hello.so
-	@set +e; ./build/rebobina-plugin-host ./build/plugins/invalid-abi.so; rc=$?; \
-	  test "$rc" -eq 5 || { echo "falha: esperado retorno 5, obtido $rc"; exit 1; }
-	@set +e; ./build/rebobina-plugin-host ./build/plugins/no-export.so; rc=$?; \
-	  test "$rc" -eq 4 || { echo "falha: esperado retorno 4, obtido $rc"; exit 1; }
+	@set +e; ./build/rebobina-plugin-host ./build/plugins/invalid-abi.so; rc=$$?; \
+	  test "$$rc" -eq 5 || { echo "falha: esperado retorno 5, obtido $$rc"; exit 1; }
+	@set +e; ./build/rebobina-plugin-host ./build/plugins/no-export.so; rc=$$?; \
+	  test "$$rc" -eq 4 || { echo "falha: esperado retorno 4, obtido $$rc"; exit 1; }
 	@echo "OK: plugin host independente e falhas rejeitadas"
 
 plugin-demo: build/rebobina-plugin-host build/plugins/hello.so
