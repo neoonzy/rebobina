@@ -1,11 +1,26 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 #include "rebobina/module.h"
-#include <string.h>
+/* Sem libc: compilável em ambiente ARM freestanding. */
+static int rb_id_equal(const char *a, const char *b)
+{
+    while (*a && *b) {
+        if (*a != *b) return 0;
+        ++a;
+        ++b;
+    }
+    return *a == *b;
+}
 
 void rb_registry_init(rb_registry *registry)
 {
     if (!registry) return;
-    memset(registry, 0, sizeof(*registry));
+    {
+        size_t i;
+        registry->count = 0;
+        registry->started = 0;
+        for (i = 0; i < RB_MAX_MODULES; ++i)
+            registry->items[i] = 0;
+    }
 }
 
 rb_status rb_registry_add(rb_registry *registry, const rb_module *module)
@@ -18,7 +33,7 @@ rb_status rb_registry_add(rb_registry *registry, const rb_module *module)
         return RB_ERR_ABI;
     if (registry->started != 0) return RB_ERR_STATE;
     for (i = 0; i < registry->count; ++i)
-        if (strcmp(registry->items[i]->id, module->id) == 0)
+        if (rb_id_equal(registry->items[i]->id, module->id))
             return RB_ERR_DUPLICATE;
     if (registry->count >= RB_MAX_MODULES) return RB_ERR_CAPACITY;
     registry->items[registry->count++] = module;
