@@ -23,5 +23,6 @@ jobs:
           make test
           make check-modules
           make audit-platform
+          make plugin-demo
           make sim-ui
           make arm-objects

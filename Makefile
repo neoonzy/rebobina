@@ -11,7 +11,7 @@ TEST = tests/test_registry.c $(CORE)
 UI_TEST = tests/test_ui.c src/core/ui.c
 ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/probe.o
 
-.PHONY: all demo test sim-ui check-modules audit-platform arm-objects clean
+.PHONY: all demo test sim-ui check-modules audit-platform arm-objects plugin-demo test-plugins clean
 
 all: build/rebobina-host
 
@@ -30,6 +30,33 @@ build/test-ui: $(UI_TEST) include/rebobina/ui.h include/rebobina/display.h
 build/rebobina-ui-host: src/host/menu_sim.c src/core/ui.c include/rebobina/ui.h
 	@mkdir -p build
 	$(CC) $(CFLAGS) -o $@ src/host/menu_sim.c src/core/ui.c
+
+build/rebobina-plugin-host: src/host/plugin_loader.c $(CORE) include/rebobina/module.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ src/host/plugin_loader.c $(CORE) -ldl
+
+build/plugins/hello.so: modules/hello/plugin.c include/rebobina/module.h
+	@mkdir -p build/plugins
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
+
+build/plugins/invalid-abi.so: tests/fixtures/invalid_abi_plugin.c include/rebobina/module.h
+	@mkdir -p build/plugins
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
+
+build/plugins/no-export.so: tests/fixtures/no_export_plugin.c
+	@mkdir -p build/plugins
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
+
+test-plugins: build/rebobina-plugin-host build/plugins/hello.so build/plugins/invalid-abi.so build/plugins/no-export.so
+	./build/rebobina-plugin-host ./build/plugins/hello.so
+	@set +e; ./build/rebobina-plugin-host ./build/plugins/invalid-abi.so; rc=$?; \
+	  test "$rc" -eq 5 || { echo "falha: esperado retorno 5, obtido $rc"; exit 1; }
+	@set +e; ./build/rebobina-plugin-host ./build/plugins/no-export.so; rc=$?; \
+	  test "$rc" -eq 4 || { echo "falha: esperado retorno 4, obtido $rc"; exit 1; }
+	@echo "OK: plugin host independente e falhas rejeitadas"
+
+plugin-demo: build/rebobina-plugin-host build/plugins/hello.so
+	./build/rebobina-plugin-host ./build/plugins/hello.so
 
 build/arm/registry.o: src/core/registry.c include/rebobina/module.h
 	@mkdir -p build/arm
@@ -63,7 +90,7 @@ check-modules:
 audit-platform:
 	python3 tools/platform_audit.py check
 
-test: build/test-registry build/test-ui
+test: build/test-registry build/test-ui test-plugins
 	./build/test-registry
 	./build/test-ui
 	python3 -m unittest discover -s tests -p 'test_*.py' -v

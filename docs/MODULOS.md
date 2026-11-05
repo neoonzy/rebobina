@@ -46,6 +46,21 @@ Um módulo define `rb_module` com `abi_version`, `id`, `name`, `start` e `stop`.
 
 O **primeiro módulo real** será a adaptação do Soup Engine ao contrato escolhido. Isso exige integração de código e revisão de dependências de hardware; não basta renomear `SE.BIN` para `.mo`.
 
+## Prova de módulos independentes no Linux host
+
+Há também um protótipo de carregamento dinâmico de bibliotecas `.so` no **Linux host**, separado da compilação ARM:
+
+```sh
+make plugin-demo
+make test-plugins
+```
+
+O executável `build/rebobina-plugin-host` carrega `build/plugins/hello.so` por `dlopen`, encontra `rebobina_plugin_v1` e executa `start/stop`. Isso permite substituir o plugin **sem recompilar o loader host**, mas não prova que o mesmo mecanismo é viável na Canon. Há testes negativos para versão incompatível e exportação ausente.
+
+**Aviso:** carregar `.so` executa código nativo com as permissões do processo, sem sandbox. Não carregue plugins de origem desconhecida. **`.so` não é o formato de módulo da 5D e `SE.BIN` não é compatível.**
+
+Consulte [o relatório do protótipo](SPRINT5-PROTOTIPO.md).
+
 ## Restrições da primeira etapa
 
 - Sem acesso a hardware;
