@@ -78,7 +78,8 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 - [Arquitetura proposta](docs/ARQUITETURA.md)
 - [Contrato e criação de módulos](docs/MODULOS.md)
 - [Segurança, boot e limites](docs/SEGURANCA.md)
-- [Roadmap](docs/ROADMAP.md)
+- [Sprints e critérios de entrega](docs/SPRINTS.md)
+- [Roadmap de alto nível](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md)
 - [Orientações para agentes e colaboradores](AGENTS.md)
 

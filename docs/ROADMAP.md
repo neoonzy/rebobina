@@ -2,6 +2,8 @@
 
 **Produto principal:** um novo programa na Canon EOS 5D Classic, inspirado no Magic Lantern e com interface e sistema de módulos próprios. **Não** um instalador de Magic Lantern.
 
+Este roadmap apresenta as etapas amplas. A divisão operacional em ciclos, tarefas e critérios de aceite está em **[SPRINTS.md](SPRINTS.md)**.
+
 As etapas diferenciam protótipo host, simulação e firmware experimental. Nada neste repositório está pronto para instalação em câmera.
 
 ## Etapa 0 — Fundação
