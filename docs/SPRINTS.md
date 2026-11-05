@@ -11,7 +11,7 @@
 | Sprint | Foco | Entrega principal | Estado |
 | --- | --- | --- | --- |
 | **0** | Fundação | Repositório, API protótipo, manifesto, CI e documentação | Parcialmente concluída |
-| **1** | Engenharia reversa e especificação | Mapa de boot, APIs, memória e decisões de reaproveitamento GPLv2 da 5D | A fazer — próxima |
+| **1** | Engenharia reversa e especificação | Mapa de boot, APIs, memória e decisões de reaproveitamento GPLv2 da 5D | **Em andamento: levantamento e testes offline realizados; binário-base ainda não identificado** |
 | **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | A fazer |
 | **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | A fazer; depende de hardware |
 | **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | A fazer |
@@ -36,19 +36,21 @@
 
 ## Sprint 1 — Entender a EOS 5D e o Magic Lantern
 
+**Progresso (05/11/2026):** levantamento estático publicado em [5DC-PLATAFORMA.md](5DC-PLATAFORMA.md), [inventário de evidências](data/5dc.111-evidence.json), [ADR 0001](decisions/0001-boot-e-reuso.md) e [relatório de testes](SPRINT1-TESTES.md). Fontes fixadas por commit do Soup Engine e do ML moderno. **Não houve validação de binário-base nem teste físico.**
+
 **Objetivo:** ter informações confiáveis para desenvolver o Rebobina embarcado sem partir de suposições perigosas.
 
 - [ ] Fixar a compilação/fonte exata do Magic Lantern para **5DC.111**, registrando procedência e hashes quando disponíveis.
-- [ ] Documentar o fluxo do bootloader Canon, boot flag e início da extensão no CompactFlash.
-- [ ] Mapear VxWorks/DIGIC II: memória, tarefas, pilhas, botões, LCD, sistema de arquivos e captura.
-- [ ] Identificar APIs e funções GPLv2 reaproveitáveis e seus limites de compatibilidade.
-- [ ] Comparar os hooks e o carregamento atuais do Soup Engine com as necessidades do Rebobina.
-- [ ] Criar matriz de riscos: o que pode ser testado em host, o que exige simulação e o que exige câmera.
-- [ ] Redigir uma decisão arquitetural (ADR) sobre reutilizar, adaptar ou substituir cada componente.
+- [x] Documentar o fluxo conhecido por fontes históricas e pelo Soup Engine, **separando o que ainda falta verificar no bootstrap VxWorks**.
+- [x] Mapear preliminarmente VxWorks/DIGIC II: tarefas, pilhas, memória, GUI e arquivos a partir do código Soup; **endereços ainda não validados em hardware**.
+- [x] Identificar APIs e oportunidades preliminares de reaproveitamento GPLv2, com limites de compatibilidade e fonte.
+- [x] Comparar hooks e carregamento do Soup Engine com a HAL e as necessidades do Rebobina.
+- [x] Criar matriz de riscos distinguindo host, simulação e câmera.
+- [x] Registrar ADR 0001, **provisória**, sobre reutilização, adaptação e limites do boot.
 
 **Entregáveis:** `docs/5DC-PLATAFORMA.md`, `docs/decisions/0001-boot-e-reuso.md` e lista de recursos com suas fontes.
 
-**Aceite:** cada endereço/hook conhecido tem origem e versão explícitas; limitações e incertezas ficam documentadas; nenhuma alegação de segurança depende apenas de compilação.
+**Aceite:** cada endereço/hook conhecido tem origem e versão explícitas; limitações e incertezas ficam documentadas; nenhuma alegação de segurança depende apenas de compilação. **Pendente:** localizar e validar o binário-base exato de 2012 e a fonte correlata. A sprint não está encerrada.
 
 ## Sprint 2 — Toolchain e ambiente de testes ARM
 
@@ -162,4 +164,4 @@
 
 ## Próxima ação
 
-**Iniciar Sprint 1:** levantamento da inicialização, memória e APIs do Magic Lantern na Canon EOS 5D Classic 1.1.1. O primeiro executável embarcado fica como meta da Sprint 3, após pesquisa e toolchain adequados.
+**Concluir a Sprint 1:** identificar a procedência e o SHA-256 do `autoexec.bin` Magic Lantern 2012 usado no Soup Engine e obter fonte 5DC.111 rastreável; depois verificar a consistência com a documentação. O primeiro executável embarcado permanece como meta da Sprint 3.

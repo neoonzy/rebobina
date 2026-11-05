@@ -45,7 +45,7 @@ docs/                 Arquitetura, segurança e roteiro
 
 ## Desenvolvimento atual e próximo marco
 
-O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. A próxima prioridade é analisar a inicialização do Magic Lantern na 5D e criar a primeira versão embarcada mínima do Rebobina, primeiro em ambiente de testes e depois em câmera de desenvolvimento. Um instalador desktop não é requisito para iniciar essa etapa.
+A Sprint 1 está em andamento: já existe um mapa preliminar dos hooks, da ROM e da memória da EOS 5D Classic, mas o executável Magic Lantern 2012 de referência continua sem hash verificado. O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. A próxima prioridade é analisar a inicialização do Magic Lantern na 5D e criar a primeira versão embarcada mínima do Rebobina, primeiro em ambiente de testes e depois em câmera de desenvolvimento. Um instalador desktop não é requisito para iniciar essa etapa.
 
 ## Primeiros comandos
 
@@ -55,6 +55,7 @@ Requisitos: compilador C11, `make` e Python 3.9 ou superior. Os comandos **não 
 make demo          # compila e executa o protótipo C no computador
 make test          # testa o registro C e a ferramenta Python
 make check-modules # valida manifestos
+make audit-platform # verifica consistência do inventário estático da 5D
 python3 tools/modules.py list
 python3 tools/modules.py new minha-extensao --name "Minha extensão"
 ```
@@ -76,6 +77,9 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 ## Documentação
 
 - [Arquitetura proposta](docs/ARQUITETURA.md)
+- [Sprint 1: levantamento da Canon 5D Classic](docs/5DC-PLATAFORMA.md)
+- [Sprint 1: relatório de testes](docs/SPRINT1-TESTES.md)
+- [Sprint 1: evidências e fontes](docs/REFERENCIAS-SPRINT1.md)
 - [Contrato e criação de módulos](docs/MODULOS.md)
 - [Segurança, boot e limites](docs/SEGURANCA.md)
 - [Sprints e critérios de entrega](docs/SPRINTS.md)
