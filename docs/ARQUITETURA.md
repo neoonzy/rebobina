@@ -8,7 +8,7 @@
 
 A capacidade de adicionar funcionalidades sem alterar o `AUTOEXEC.BIN` a cada extensão é uma meta fundamental. A instalação, o carregamento e a compatibilidade com a câmera são responsabilidades diferentes; a instalação assistida será um recurso auxiliar e posterior.
 
-\`\`\`text
+```text
 Canon EOS 5D Classic (arquitetura pretendida)
   Firmware Canon original (permanece na ROM)
       |
@@ -25,7 +25,7 @@ Canon EOS 5D Classic (arquitetura pretendida)
              +-- outros módulos (futuros)
 
 Computador: testes, simulador e ferramenta auxiliar de instalação
-\`\`\`
+```
 
 O componente realmente implementado hoje é um **protótipo de registro de módulos em C no computador** (`src/core/registry.c`). O restante é arquitetura-alvo.
 
