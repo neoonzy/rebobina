@@ -4,37 +4,39 @@
 
 ## Objetivo
 
-Conseguir adicionar funcionalidades sem alterar o `AUTOEXEC.BIN` toda vez. A instalação, o carregamento e a compatibilidade com a câmera devem ser responsabilidades separadas.
+**Construir uma alternativa embarcada ao Magic Lantern, e não um instalador para ele.** O Rebobina deve ter código de inicialização, núcleo, interface e módulos próprios, operando junto ao firmware Canon original em execução. Ele poderá reutilizar componentes GPLv2 do Magic Lantern, após revisão de compatibilidade, mas não será apenas uma camada desktop sobre uma instalação já pronta.
 
-```text
-Computador (futuro)                  Canon EOS 5D Classic (futuro)
-┌─────────────────────────────┐      ┌─────────────────────────────────┐
-│ instalador / preparador CF  │      │ bootloader Canon (existente)    │
-│  backup • hash • compat.    │      │        │                        │
-└──────────────┬──────────────┘      │        ▼                        │
-               │ cartão verificado  │ loader mínimo / inicialização  │
-               └────────────────────►│        │                        │
-                                     │        ▼                        │
-                                     │ serviços Rebobina              │
-                                     │   ├─ HAL 5DC.111               │
-                                     │   ├─ gestão de memória          │
-                                     │   ├─ API de módulos            │
-                                     │   └─ interface de usuário      │
-                                     │        │                        │
-                                     │    módulos opcionais           │
-                                     │       └─ Soup Engine           │
-                                     └─────────────────────────────────┘
-```
+A capacidade de adicionar funcionalidades sem alterar o `AUTOEXEC.BIN` a cada extensão é uma meta fundamental. A instalação, o carregamento e a compatibilidade com a câmera são responsabilidades diferentes; a instalação assistida será um recurso auxiliar e posterior.
+
+\`\`\`text
+Canon EOS 5D Classic (arquitetura pretendida)
+  Firmware Canon original (permanece na ROM)
+      |
+      | bootloader lê cartão CF preparado
+      v
+  Rebobina — executável embarcado próprio
+      |
+      +-- bootstrap / integração com VxWorks e DIGIC II
+      +-- HAL e serviços compartilhados
+      +-- interface de usuário Rebobina
+      +-- sistema de módulos
+             +-- funcionalidades fotográficas
+             +-- Soup Engine (adaptação futura)
+             +-- outros módulos (futuros)
+
+Computador: testes, simulador e ferramenta auxiliar de instalação
+\`\`\`
 
 O componente realmente implementado hoje é um **protótipo de registro de módulos em C no computador** (`src/core/registry.c`). O restante é arquitetura-alvo.
 
 ## Separação de responsabilidades
 
-1. **Ferramentas host:** validar manifestos, preparar pacotes e, futuramente, orientar a instalação. Nunca ativar boot flags silenciosamente.
-2. **Bootstrap/loader:** componente específico por câmera. A decisão de usá-lo dependerá da análise do Magic Lantern 5D. A validação de integridade precisa ocorrer antes de carregar módulos, mas não substitui a checagem do bootloader Canon.
-3. **HAL (Hardware Abstraction Layer):** APIs Canon/Magic Lantern encapsuladas por modelo e firmware, sem endereços de memória hard-coded dentro dos módulos.
-4. **Core:** registro, resolução de dependências (futuro), inicialização ordenada, encerramento e recursos compartilhados.
-5. **Módulos:** recursos isolados por interface lógica, sem garantia de isolamento de memória. Na câmera, qualquer falha de módulo pode afetar o sistema inteiro.
+1. **Rebobina embarcado:** é o programa principal. Deve inicializar, cooperar com o sistema Canon, oferecer interface própria e gerenciar a execução das extensões.
+2. **Bootstrap/loader:** entrada específica para cada câmera; a implementação dependerá do estudo do Magic Lantern para 5D Classic. Validar módulos não substitui a checagem do bootloader Canon.
+3. **HAL (Hardware Abstraction Layer):** APIs Canon/VxWorks e recursos aproveitados do Magic Lantern encapsulados por firmware, evitando endereços hard-coded dentro dos módulos.
+4. **Core:** gestão de memória, eventos, registro de serviços, módulos, dependências, inicialização e desligamento.
+5. **Módulos:** funcionalidades extensíveis com interface lógica, sem isolamento de memória garantido na câmera.
+6. **Ferramentas host (auxiliares):** simulador, compilação, testes, preparação de pacotes e, futuramente, um instalador. Nunca ativar boot flags silenciosamente.
 
 ## Módulos: decisões iniciais
 
@@ -48,7 +50,7 @@ O componente realmente implementado hoje é um **protótipo de registro de módu
 
 ## Relação com o Magic Lantern
 
-O Magic Lantern já oferece módulos `.mo` em suas plataformas suportadas. Não é necessário reinventar todo seu trabalho. A primeira pesquisa é identificar o que pode ser reutilizado com segurança no port da 5D Classic, cuja integração atual do Soup Engine usa patch específico do binário.
+O Rebobina pretende **substituir a extensão Magic Lantern no cartão por um programa seu**, preservando o firmware original Canon na câmera. Isso não implica criar um firmware Canon novo nem gravá-lo na ROM. O Magic Lantern já oferece módulos `.mo` em plataformas suportadas; devemos estudar seus contratos e sua integração com a 5D Classic antes de escolher entre reaproveitar código e desenvolver componentes novos. O Soup Engine atual usa patch específico do executável da 5D e exigirá adaptação real para ser um módulo do Rebobina.
 
 A reutilização de trechos do Magic Lantern deverá respeitar sua licença GPLv2 e manter atribuições. A interface experimental Rebobina **não é** a API de módulos ML `.mo`.
 

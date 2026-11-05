@@ -1,58 +1,67 @@
-# Roadmap
+# Roadmap — Rebobina embarcado
 
-O avanço depende de evidências: **não confundir protótipo host com câmera suportada**.
+**Produto principal:** um novo programa na Canon EOS 5D Classic, inspirado no Magic Lantern e com interface e sistema de módulos próprios. **Não** um instalador de Magic Lantern.
 
-## Etapa 0 — Fundação de projeto
+As etapas diferenciam protótipo host, simulação e firmware experimental. Nada neste repositório está pronto para instalação em câmera.
 
-- [x] Definir escopo e câmera inicial;
-- [x] Documentar arquitetura modular e limites;
-- [x] Criar registro C de módulos no host;
-- [x] Criar manifestos e ferramenta de validação;
-- [x] Adicionar testes e workflow de CI (execução ainda deve ser verificada);
-- [ ] Publicar convenções de versionamento e changelog.
+## Etapa 0 — Fundação
 
-## Etapa 1 — Pesquisa da Canon 5D Classic
+- [x] Definir o escopo da 5D Classic (1.1.1) e o propósito modular;
+- [x] Documentar arquitetura, segurança e diretrizes de contribuição;
+- [x] Criar protótipo C de registro de módulos no host;
+- [x] Criar manifestos JSON e ferramenta de validação;
+- [x] Adicionar testes e CI host (primeira execução aprovada);
+- [ ] Definir política de versões e changelog.
 
-- [ ] Catalogar build exato do Magic Lantern para 5DC.111;
-- [ ] Documentar inicialização VxWorks, chamadas Canon e hooks usados;
-- [ ] Mapear memória, threads/tasks, recuperação e armazenamento;
-- [ ] Comparar carga e funcionamento do Soup Engine atual;
-- [ ] Confirmar compatibilidade de licenças e origem dos arquivos.
+## Etapa 1 — Estudar a plataforma de base
 
-**Saída:** documentação técnica com fontes e riscos. **Sem binários novos para câmera.**
+- [ ] Identificar a versão exata do Magic Lantern para 5DC.111 e sua procedência;
+- [ ] Mapear os mecanismos de inicialização, hooks, tarefas e endereços da 5D Classic;
+- [ ] Estudar código GPLv2 reutilizável e obrigações de atribuição;
+- [ ] Mapear memória disponível, execução de interface, captura e escrita em CF;
+- [ ] Identificar limitações do sistema de módulos já existente no Magic Lantern;
+- [ ] Analisar a integração atual do Soup Engine e as dependências que precisaremos abstrair.
 
-## Etapa 2 — Ferramenta desktop segura
+**Entrega:** mapa técnico confiável do hardware e decisão fundamentada de reaproveitamento. Sem distribuir binários à câmera.
 
-- [ ] Inspecionar cartão CF e mostrar diagnóstico sem escrita;
-- [ ] Validar câmera/firmware/binários mediante hashes conhecidos;
-- [ ] Gerar backup verificável e plano de reversão;
-- [ ] Preparar uma cópia de saída (staging), nunca sobrescrever automaticamente o cartão;
-- [ ] Testar casos de erro e operações interrompidas.
+## Etapa 2 — Primeiro Rebobina embarcado
 
-## Etapa 3 — Núcleo embarcado mínimo
+- [ ] Criar build ARM específico da 5D Classic;
+- [ ] Integrar com o boot e com o ambiente Canon sem alterar a ROM;
+- [ ] Inicializar um serviço mínimo e reportar diagnóstico no equipamento;
+- [ ] Implementar HAL inicial com interface, tarefas, arquivos e memória;
+- [ ] Testar em simulador e depois numa câmera de desenvolvimento, com recuperação documentada.
 
-- [ ] Decidir com base em pesquisa se aproveitamos ML e seus hooks ou precisamos de integração nova;
-- [ ] Implementar HAL mínima 5DC.111 e logs;
-- [ ] Testar inicialização e desligamento primeiro em simulação, depois em hardware de desenvolvimento;
-- [ ] Estabelecer budgets de memória e stack;
-- [ ] Projetar estratégia de falha de módulo e recuperação.
+**Entrega:** primeiro executável experimental Rebobina que inicializa e encerra de forma controlada. Não é um release para usuários finais.
 
-## Etapa 4 — Extensões
+## Etapa 3 — Interface e sistema de módulos
 
-- [ ] Definir ABI para câmera e manifesto definitivo;
-- [ ] Resolver dependências, versões e carregamento de módulos;
-- [ ] Implementar menu de módulos e estados (ativado/desativado);
-- [ ] Portar Soup Engine **a partir do código-fonte**, sem reaproveitar binário incompatível;
-- [ ] Validar RAW, escrita simultânea, desempenho e interrupções.
+- [ ] Implementar interface Rebobina na tela da câmera;
+- [ ] Definir ABI embarcada e carregador versionado de módulos;
+- [ ] Resolver dependências, compatibilidade e ativação/desativação;
+- [ ] Garantir limites de memória, logs e tratamento de falhas conforme a plataforma;
+- [ ] Criar um primeiro módulo simples que funcione na câmera, com testes documentados.
 
-## Etapa 5 — Experiência e expansão
+**Entrega:** núcleo próprio extensível, independente do menu habitual do Magic Lantern.
 
-- [ ] Interface na câmera com acessibilidade e diagnóstico;
-- [ ] Instalador desktop com UX clara de riscos e reversão;
-- [ ] Documentar processo para portar outros modelos;
-- [ ] Construir releases reproduzíveis e separados por firmware;
-- [ ] Avaliar novas extensões: intervalômetro, sobreposição de informações, controle de exposição.
+## Etapa 4 — Portar o Soup Engine
 
-## Regra para marcar uma etapa como pronta
+- [ ] Separar motor fotográfico das funções específicas de inicialização;
+- [ ] Adaptar arquivos, interface e tarefas à API Rebobina;
+- [ ] Executar primeiro no simulador e validar resultados e recursos;
+- [ ] Testar processamento JPEG/RAW e interrupções na câmera;
+- [ ] Documentar compatibilidade, instalação, desempenho e limitações.
 
-Teste documentado, instruções reproduzíveis e distinção entre desenvolvimento host, simulação e câmera física. Somente um teste executado comprova seu resultado.
+**Entrega:** primeiro módulo fotográfico real do ecossistema Rebobina.
+
+## Etapa 5 — Distribuição e expansão
+
+- [ ] Criar instalador desktop opcional com validação de hashes, backup e reversão;
+- [ ] Preparar pacotes reproduzíveis por câmera/firmware;
+- [ ] Melhorar interface, acessibilidade e experiência de gerenciamento de módulos;
+- [ ] Documentar como construir novas extensões e portar outros modelos;
+- [ ] Implementar novos módulos (intervalômetro, ferramentas de foco e exposição etc.).
+
+## Critério para marcar algo como pronto
+
+Código versionado, testes reproduzíveis e documentação distinguindo claramente host, simulação e câmera real. Nenhuma melhoria de instalação substitui a validação do programa embarcado.

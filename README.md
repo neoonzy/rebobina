@@ -1,21 +1,24 @@
 # Rebobina
 
-**Uma plataforma aberta e modular para dar novas possibilidades a câmeras digitais clássicas.**
+**Um novo software embarcado, livre e modular para expandir as possibilidades de câmeras digitais clássicas.**
 
-O Rebobina é um projeto experimental de software embarcado inspirado no [Magic Lantern](https://magiclantern.fm), com foco inicial na **Canon EOS 5D Classic (firmware 1.1.1)**. Queremos facilitar a instalação e a integração de extensões, começando pelo [Soup Engine](https://github.com/neoonzy/soup-engine), sem exigir que cada extensão substitua o executável principal da câmera.
+O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a partir do conhecimento, dos mecanismos e, quando viável e legalmente compatível, de componentes de código aberto do [Magic Lantern](https://magiclantern.fm). O foco inicial é a **Canon EOS 5D Classic (firmware 1.1.1)**. O objetivo é oferecer uma alternativa modular ao Magic Lantern para esse modelo: interface própria, recursos fotográficos próprios e um sistema que permita adicionar extensões como o [Soup Engine](https://github.com/neoonzy/soup-engine) sem reescrever o executável principal a cada módulo.
+
+**O produto principal não é um instalador do Magic Lantern nem um gerenciador de plugins para o Magic Lantern existente.** O Rebobina pretende executar no lugar da extensão Magic Lantern no cartão, preservando o firmware Canon na ROM. Um eventual instalador será somente uma ferramenta auxiliar. A decisão sobre quais partes do Magic Lantern serão reutilizadas ou adaptadas depende da pesquisa da implementação para 5D Classic.
 
 > [!IMPORTANT]
 > **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
 
 ## O que queremos construir
 
-- **Núcleo pequeno:** inicialização controlada, gestão de módulos, registro de eventos e serviços compartilhados.
-- **Módulos independentes:** contrato de API, compatibilidade por câmera/firmware, inicialização e desligamento separados, sem patches individuais no executável principal.
-- **Integração por câmera:** uma camada específica para recursos do hardware, começando na Canon 5D Classic.
-- **Instalação assistida:** futuramente, uma ferramenta de computador para validar arquivos, criar backups, preparar cartões e orientar a recuperação.
-- **Desenvolvimento testável:** grande parte da lógica executável e verificável no computador antes de testes físicos.
+- **Programa embarcado completo:** inicialização a partir do CompactFlash, ciclo de vida de tarefas, interface própria e ferramentas fotográficas integradas ao firmware Canon em execução.
+- **Núcleo modular:** carregamento, ativação e desativação de recursos por uma API versionada, com gerenciamento de memória e erros.
+- **Sistema de extensões:** recursos como Soup Engine instaláveis e atualizáveis sem aplicar patches individuais no executável principal (meta futura, ainda não implementada).
+- **Camada por câmera:** abstração de serviços específicos do hardware, começando pela Canon 5D Classic.
+- **Ferramentas de desenvolvimento:** simulador, testes e validação automatizada para reduzir os riscos de usar código novo no equipamento.
+- **Instalação assistida (secundária):** um utilitário para facilitar a preparação e recuperação do cartão quando existir uma versão embarcada validada.
 
-O **Magic Lantern já possui uma arquitetura modular** em parte de seus modelos. O Rebobina não pretende atribuir a si essa ideia, mas estudá-la e aperfeiçoar sobretudo o fluxo de integração e distribuição para a 5D Classic.
+O Magic Lantern já possui um sistema de módulos em várias versões. O Rebobina vai estudar e reutilizar esse legado quando fizer sentido, mantendo atribuição e GPLv2, mas terá **produto, interface, organização e evolução próprios**. Não é necessário reescrever do zero o que já foi resolvido pela comunidade.
 
 ## O que já funciona nesta versão inicial
 
@@ -25,7 +28,7 @@ O **Magic Lantern já possui uma arquitetura modular** em parte de seus modelos.
 - Manifestos JSON validados por ferramenta Python, incluindo um *placeholder* do Soup Engine;
 - Testes do registro e dos manifestos, com CI no GitHub Actions.
 
-**Ainda não há carregamento dinâmico, menu na câmera, suporte a `.mo`, isolamento de módulos, instalação ou integração funcional com o Soup Engine.** Os manifestos descrevem intenções e compatibilidade planejada, não permissões efetivamente impostas.
+**Ainda não existe o executável embarcado do Rebobina: não há inicialização própria na câmera, carregamento dinâmico, menu na câmera, suporte a `.mo`, isolamento de módulos, instalação ou integração funcional com o Soup Engine.** Os manifestos descrevem intenções e compatibilidade planejada, não permissões efetivamente impostas.
 
 ## Estrutura
 
@@ -39,6 +42,10 @@ tools/modules.py      Validação e criação de manifestos
 tests/                Testes automatizados
 docs/                 Arquitetura, segurança e roteiro
 ```
+
+## Desenvolvimento atual e próximo marco
+
+O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. A próxima prioridade é analisar a inicialização do Magic Lantern na 5D e criar a primeira versão embarcada mínima do Rebobina, primeiro em ambiente de testes e depois em câmera de desenvolvimento. Um instalador desktop não é requisito para iniciar essa etapa.
 
 ## Primeiros comandos
 
