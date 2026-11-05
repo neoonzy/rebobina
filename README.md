@@ -89,6 +89,7 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 - [Sprint 5: protótipo de módulos no Linux host](docs/SPRINT5-PROTOTIPO.md)
 - [Sprint 6: plano de integração Soup Engine](docs/SPRINT6-SOUP-PORT.md)
 - [Sprint 7: testes de estabilidade](docs/SPRINT7-TESTES.md)
+- [Relatório de avanço nas sprints 2, 5 e 7](docs/RELATORIO-AVANCO.md)
 - [Sprint 8: distribuição futura](docs/SPRINT8-DISTRIBUICAO.md)
 - [Sprint 1: relatório de testes](docs/SPRINT1-TESTES.md)
 - [Sprint 1: evidências e fontes](docs/REFERENCIAS-SPRINT1.md)

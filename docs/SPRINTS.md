@@ -54,7 +54,7 @@
 
 ## Sprint 2 — Toolchain e ambiente de testes ARM
 
-**Progresso:** compilação `arm-none-eabi` via Clang apenas de **objetos relocáveis ARM946E-S**, menu portável e simulador de interface host. Consulte [SPRINT2-BASE.md](SPRINT2-BASE.md). Não há linker executável nem simulação do sistema Canon.
+**Progresso:** compilação `arm-none-eabi` via Clang apenas de **objetos relocáveis ARM946E-S**, menu portável e simulador de interface host. CI verificada em [execução 42129417751](https://github.com/neoonzy/rebobina/actions/runs/42129417751). Consulte [SPRINT2-BASE.md](SPRINT2-BASE.md). Não há linker executável nem simulação do sistema Canon.
 
 **Objetivo:** compilar o projeto para a arquitetura da 5D sem ainda declarar suporte ao hardware.
 
@@ -126,7 +126,7 @@
 
 ## Sprint 7 — Estabilidade e recuperação
 
-**Progresso antecipado:** testes de fronteira e 100 mil eventos de interface no host, além de testes negativos de plugins; [plano de testes](SPRINT7-TESTES.md). Ainda sem hardware.
+**Progresso antecipado:** testes de fronteira e 100 mil eventos de interface no host, testes negativos de plugins e job UBSan aprovados na [CI 42129417751](https://github.com/neoonzy/rebobina/actions/runs/42129417751). [Plano de testes](SPRINT7-TESTES.md). Ainda sem hardware.
 
 **Objetivo:** reduzir regressões e tornar o software adequado a testes repetidos.
 

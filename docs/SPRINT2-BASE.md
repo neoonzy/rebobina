@@ -1,6 +1,6 @@
 # Sprint 2 — Base de compilação ARM e simulação host
 
-**Status:** parcialmente implementada. Nenhum binário instalável foi criado.
+**Status:** parcialmente implementada. Nenhum binário instalável foi criado. CI normal e UBSan aprovadas na [execução 42129417751](https://github.com/neoonzy/rebobina/actions/runs/42129417751).
 
 ## Entregue
 

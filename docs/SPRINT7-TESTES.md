@@ -12,7 +12,7 @@ Os testes atuais ainda são **host**, não testes de estresse numa Canon real.
 
 ## Futuras verificações obrigatórias
 
-- [x] Acrescentar execução de UBSan para os componentes host no CI (acompanhar o resultado do workflow antes de considerar validado); cobertura e ASan ainda pendentes.
+- [x] Executar UBSan para componentes host em CI: execução **42129417751**, job `undefined-behavior`, concluído com sucesso. Cobertura e ASan ainda pendentes.
 - [ ] Interrupções de I/O, card cheio, leitura parcial, falhas de alocação, suspend/resume (simulado).
 - [ ] Isolamento de filas de eventos de câmera e menu, sem trabalho de I/O em callback de botões.
 - [ ] Medição de pilhas e memória de módulos em hardware.
