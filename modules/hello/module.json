@@ -1,0 +1,14 @@
+{
+  "id": "hello",
+  "name": "Olá mundo",
+  "version": "0.1.0",
+  "api_version": 1,
+  "status": "prototype",
+  "platforms": [
+    "host"
+  ],
+  "capabilities": [
+    "logging"
+  ],
+  "description": "Exemplo de módulo compilado e executado somente no computador."
+}

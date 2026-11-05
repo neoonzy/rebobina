@@ -1,0 +1,18 @@
+{
+  "id": "soup-engine",
+  "name": "Soup Engine",
+  "version": "0.0.0",
+  "api_version": 1,
+  "status": "planned",
+  "platforms": [
+    "5DC.111"
+  ],
+  "capabilities": [
+    "image-processing",
+    "file-read",
+    "file-write",
+    "camera-ui"
+  ],
+  "description": "Integração planejada; os binários atuais do Soup Engine NÃO seguem a API Rebobina.",
+  "source": "https://github.com/neoonzy/soup-engine/tree/master/Canon-EOS-5D"
+}

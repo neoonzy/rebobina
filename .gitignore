@@ -1,0 +1,14 @@
+build/
+dist/
+__pycache__/
+*.py[cod]
+.DS_Store
+*.o
+*.elf
+*.bin
+*.mo
+*.CR2
+*.JPG
+*.jpg
+*.log
+!docs/fixtures/.gitkeep

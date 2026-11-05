@@ -1,0 +1,24 @@
+name: Validação host
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mostrar versões
+        run: |
+          cc --version | head -n 1
+          python3 --version
+      - name: Compilar, executar testes e verificar manifestos
+        run: |
+          make demo
+          make test
+          make check-modules
