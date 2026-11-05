@@ -22,3 +22,4 @@ jobs:
           make demo
           make test
           make check-modules
+          make audit-platform

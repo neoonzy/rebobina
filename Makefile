@@ -5,7 +5,7 @@ CORE = src/core/registry.c
 DEMO = src/host/main.c modules/hello/hello.c $(CORE)
 TEST = tests/test_registry.c $(CORE)
 
-.PHONY: all demo test check-modules clean
+.PHONY: all demo test check-modules audit-platform clean
 
 all: build/rebobina-host
 
@@ -22,6 +22,9 @@ demo: build/rebobina-host
 
 check-modules:
 	python3 tools/modules.py check
+
+audit-platform:
+	python3 tools/platform_audit.py check
 
 test: build/test-registry
 	./build/test-registry
