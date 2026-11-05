@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "platform": {
+    "id": "5DC.111",
+    "model": "Canon EOS 5D Classic",
+    "canon_firmware": "1.1.1",
+    "os": "VxWorks 5.5",
+    "soc": "DIGIC II / ARM946E-S",
+    "confidence": "historical-report-and-source"
+  },
+  "sources": {
+    "soup": {
+      "repository": "jiijii0/soup-engine",
+      "commit": "6422c86b4530a5bdb4c5619f5287044ae7c661e3",
+      "url": "https://github.com/jiijii0/soup-engine/tree/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src",
+      "scope": "5D Classic port; integration addresses and memory are inferred by its authors"
+    },
+    "modern_ml": {
+      "repository": "reticulatedpines/magiclantern_simplified",
+      "commit": "142472e95054d73640f50789ac0fd66325499d82",
+      "url": "https://github.com/reticulatedpines/magiclantern_simplified/tree/142472e95054d73640f50789ac0fd66325499d82",
+      "scope": "Modern Magic Lantern reference; dev platform directory has no 5DC.111 port"
+    },
+    "history": {
+      "url": "https://groups.google.com/g/ml-devel/c/47_XE_cwrdQ",
+      "scope": "2012 original 5DC VxWorks/bootflag development report"
+    }
+  },
+  "base_binary": {
+    "description": "2012 Magic Lantern autoexec.bin required by Soup Engine patch",
+    "sha256": null,
+    "verification": "not_identified",
+    "expected_size_bytes": 221184,
+    "marker": "gaonisoy",
+    "marker_offset": 4,
+    "source": "soup"
+  },
+  "hooks": [
+    {
+      "name": "stub_address",
+      "address": "0x00980820",
+      "scope": "relocated-ml-2012",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/tools/patch-film.py"
+    },
+    {
+      "name": "stub_end_limit",
+      "address": "0x0098090C",
+      "scope": "relocated-ml-2012",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/tools/patch-film.py"
+    },
+    {
+      "name": "gui_hook_call",
+      "address": "0x00989DB4",
+      "scope": "relocated-ml-2012",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/tools/patch-film.py"
+    },
+    {
+      "name": "gui_original_handler",
+      "address": "0x0098A0F0",
+      "scope": "relocated-ml-2012",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/tools/patch-film.py"
+    },
+    {
+      "name": "init_task_literal",
+      "address": "0x00980774",
+      "scope": "relocated-ml-2012",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/tools/patch-film.py"
+    },
+    {
+      "name": "ml_init_task",
+      "address": "0x00980440",
+      "scope": "relocated-ml-2012",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/tools/patch-film.py"
+    }
+  ],
+  "rom_functions": [
+    {
+      "name": "FIO_OpenFile",
+      "address": "0xFFAE5B1C",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "FIO_ReadFile",
+      "address": "0xFFAE5B54",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "FIO_WriteFile",
+      "address": "0xFFAE5B6C",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "FIO_CloseFile",
+      "address": "0xFFAE5B78",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "AllocateMemory",
+      "address": "0xFFB2F664",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "FreeMemory",
+      "address": "0xFFB2F680",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "task_create",
+      "address": "0xFFB18B40",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "GUI_Control",
+      "address": "0xFF8190D0",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    },
+    {
+      "name": "msleep",
+      "address": "0xFFB187F4",
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/cam.h"
+    }
+  ],
+  "regions": [
+    {
+      "name": "soup_payload",
+      "start": "0x009D0000",
+      "length_bytes": 131072,
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/payload.ld"
+    },
+    {
+      "name": "soup_menu_stack",
+      "start": "0x009F0000",
+      "length_bytes": 16384,
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/payload.ld"
+    },
+    {
+      "name": "soup_worker_stack",
+      "start": "0x009F4000",
+      "length_bytes": 49152,
+      "source": "soup",
+      "path": "Canon-EOS-5D/src/ml/payload/payload.ld"
+    }
+  ],
+  "certainty": "Addresses and regions are copied as code-reported research observations, NOT verified camera RAM safety or a Rebobina linker plan."
+}
