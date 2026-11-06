@@ -81,6 +81,7 @@ Foram iniciadas, sem depender do CF:
 - [x] ADR de simulação e fronteiras do Soup Engine ([adaptação](SOUP-ADAPTACAO.md)).
 - [x] HAL simulada de arquivos, memória e tarefas com falhas injetáveis.
 - [x] Executar selftests originais de processamento do Soup Engine no host ([CI](https://github.com/neoonzy/rebobina/actions/runs/42228272935)).
+- [x] Gerar JPEG sintético do Soup por callback de escrita da HAL em RAM e validar erros de gravação ([CI](https://github.com/neoonzy/rebobina/actions/runs/42229454141)).
 - [ ] Integrar o Soup ao fluxo Rebobina e comparar resultados JPEG/RAW.
 
 [Plano de execução completo](SPRINT-SEM-CF.md). Esses componentes antecipam Sprints 4–6 **apenas no host**, sem alterar seus critérios físicos.

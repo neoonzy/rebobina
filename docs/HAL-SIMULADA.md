@@ -43,6 +43,8 @@ A função `rb_sim_hal_run_one` executa uma tarefa pendente; `rb_sim_hal_power_c
 
 O teste `tests/soup_hal_smoke.c` compila a implementação real `engine/se.c` do upstream pinado, usa `se_arena` e `se_rd` com dados sintéticos atravessando a HAL Rebobina e testa limites. **Não processa um CR2 nem gera um JPEG real.**
 
+Além disso, `tests/soup_jpeg_hal.c` **gera um JPEG real de 8×8 pixels sintéticos** com `se_jpeg_begin`/`se_jpeg_write_rows`/`se_jpeg_end`, usa callbacks de escrita da HAL em RAM, verifica SOI/EOI e lê o cabeçalho com `se_jpeg_dec_info`. Um segundo cenário injeta uma escrita JPEG parcial que falha, preservando um arquivo de origem **fictício** denominado `ORIGINAL.CR2`.
+
 O selftest independente do upstream executa casos de demosaico, LUT, JPEG, curva, tela e parsing, descritos em [SOUP-ADAPTACAO.md](SOUP-ADAPTACAO.md).
 
-**Evidência:** [GitHub Actions da HAL](https://github.com/neoonzy/rebobina/actions/runs/42227335334), [selftest Soup + HAL](https://github.com/neoonzy/rebobina/actions/runs/42228272935). Consulte também [ADR 0003](decisions/0003-hal-deterministica.md).
+**Evidência:** [GitHub Actions da HAL](https://github.com/neoonzy/rebobina/actions/runs/42227335334), [selftest Soup + JPEG sintético via HAL](https://github.com/neoonzy/rebobina/actions/runs/42229454141). Consulte também [ADR 0003](decisions/0003-hal-deterministica.md).

@@ -24,7 +24,7 @@ O motor original do Soup Engine para a 5D também pode ser compilado e testado *
 python3 tools/soup_host.py --fetch
 ```
 
-Esse comando requer Git, compilador C, Make, Python e **acesso à internet**. Não importa o motor para o firmware Rebobina nem processa fotografias reais do usuário. Consulte [HAL SIMULADA](docs/HAL-SIMULADA.md), [Soup Engine no host](docs/SOUP-ADAPTACAO.md) e [ADR 0003](docs/decisions/0003-hal-deterministica.md).
+Esse comando requer Git, compilador C, Make, Python e **acesso à internet**. Os testes incluem a **geração de um JPEG sintético de 8×8 pixels** pelo codificador real do Soup Engine, gravado somente na HAL em RAM, com teste de gravação interrompida e preservação de um arquivo fictício. Não importa o motor para o firmware Rebobina nem processa fotografias reais do usuário. Consulte [HAL SIMULADA](docs/HAL-SIMULADA.md), [Soup Engine no host](docs/SOUP-ADAPTACAO.md) e [ADR 0003](docs/decisions/0003-hal-deterministica.md).
 
 ## Simulador visual — desenvolvimento sem leitor CF
 
