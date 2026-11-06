@@ -35,7 +35,7 @@
     kicker.textContent = st.page ? "SIM / " + page : st.opened ? "SIM / MENU" : "SIM / PRONTO";
     hint.textContent = st.page ? "VOLTAR: MENU" : "TRASH: " + (st.opened ? "FECHAR" : "ABRIR");
     pageLabel.textContent = st.opened ? page : "FECHADO";
-    moduleLabel.textContent = st.hello_active ? "ATIVO NO HOST" : "INATIVO";
+    moduleLabel.textContent = st.hello_active ? "HABILITADO NA SIMULAÇÃO" : "DESABILITADO";
     eventCount.textContent = String(events.length);
     connection.textContent = "NÚCLEO C / RESPONDENDO";
   }

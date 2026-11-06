@@ -69,7 +69,7 @@ JSON { state, rows, source:"rebobina-core-c", hardware:false }
 Navegador desenha linhas usando textContent
 ```
 
-O servidor recebe uma sequência de até **128 eventos** (`t`, `u`, `d`, `s`, `b`); a cada requisição, o processo C **reexecuta essa sequência do zero** e retorna o estado. Esse formato é intencional para ser simples, determinístico e testável, mas não é um sistema de sessão real e os módulos não mantêm dados entre execuções. Nenhuma ação do navegador cria arquivos na câmera nem persiste configurações.
+O servidor recebe uma sequência de até **128 eventos** (`t`, `u`, `d`, `s`, `b`); a cada requisição, o processo C **reexecuta essa sequência do zero** e retorna o estado. Esse formato é intencional para ser simples, determinístico e testável, mas não é um sistema de sessão real e os módulos não mantêm dados entre execuções. Um módulo marcado como 'habilitado' é **habilitado no estado simulado**; o processo temporário é encerrado após responder, então não existe plugin executando continuamente em segundo plano. Nenhuma ação do navegador cria arquivos na câmera nem persiste configurações.
 
 O servidor expõe **somente GET**, arquivos web explicitamente listados e a API de simulação; rejeita outros caminhos, POST, eventos desconhecidos e sequências longas. Não aceita caminhos de arquivo nem argumentos de shell do usuário. Isso reduz a superfície de erro, mas o software permanece um **protótipo local**.
 

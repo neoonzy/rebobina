@@ -126,7 +126,7 @@ int main(int argc, char **argv)
             emit_row(NULL, 2, "Assistente de foco: planejado", 0);
             emit_row(NULL, 3, "Sem acesso ao sensor", 0);
         } else if (page == RB_UI_MODULES) {
-            emit_row(NULL, 1, active ? "Hello: ATIVO (host)" : "Hello: INATIVO (host)", 1);
+            emit_row(NULL, 1, active ? "Hello: ATIVO (simulacao)" : "Hello: INATIVO (simulacao)", 1);
             emit_row(NULL, 2, "SET alterna modulo de exemplo", 0);
             emit_row(NULL, 3, "Soup Engine: nao integrado", 0);
         } else if (page == RB_UI_ABOUT) {
