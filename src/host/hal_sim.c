@@ -136,6 +136,8 @@ static rb_hal_result write_file(void *ctx, rb_hal_file handle,
     interrupted = sim->cut_write_pending;
     n = length;
     if (interrupted && n > sim->cut_next_write) n = sim->cut_next_write;
+    if (sim->max_next_write && n > sim->max_next_write) n = sim->max_next_write;
+    sim->max_next_write = 0;
     sim->cut_write_pending = 0;
     for (i = 0; i < n; ++i) f->bytes[f->cursor+i] = ((const unsigned char *)buffer)[i];
     f->cursor += n;
@@ -150,6 +152,56 @@ static rb_hal_result close_file(void *ctx, rb_hal_file handle)
     if (!f) return RB_HAL_BAD_HANDLE;
     f->mode = 0;
     return RB_HAL_OK; /* Fechamento local liberado mesmo apos remocao de midia. */
+}
+static rb_hal_result sync_file(void *ctx, rb_hal_file handle)
+{
+    rb_sim_hal *sim = ctx;
+    rb_sim_file *f;
+    if (!sim) return RB_HAL_BAD_ARG;
+    if (!sim->media_present) return RB_HAL_NO_MEDIA;
+    f = checked(sim, handle);
+    if (!f) return RB_HAL_BAD_HANDLE;
+    if (f->mode != 2) return RB_HAL_BAD_STATE;
+    if (fault(sim, RB_SIM_FAULT_SYNC)) return RB_HAL_IO;
+    /* RAM: nao e um fsync real nem uma garantia de durabilidade. */
+    return RB_HAL_OK;
+}
+static rb_hal_result rename_noreplace(void *ctx, const char *old, const char *name)
+{
+    rb_sim_hal *sim = ctx;
+    rb_sim_file *f;
+    unsigned i;
+    if (!sim || !safe_name(old) || !safe_name(name) || same(old, name))
+        return RB_HAL_BAD_ARG;
+    if (!sim->media_present) return RB_HAL_NO_MEDIA;
+    if (fault(sim, RB_SIM_FAULT_RENAME)) return RB_HAL_IO;
+    f = find(sim, old);
+    if (!f) return RB_HAL_NOT_FOUND;
+    if (f->mode) return RB_HAL_BAD_STATE;
+    if (find(sim, name)) return RB_HAL_EXISTS;
+    for (i = 0; i < RB_SIM_FILENAME; ++i) {
+        f->name[i] = name[i];
+        if (!name[i]) break;
+    }
+    return RB_HAL_OK;
+}
+static rb_hal_result remove_file(void *ctx, const char *name)
+{
+    rb_sim_hal *sim = ctx;
+    rb_sim_file *f;
+    if (!sim || !safe_name(name)) return RB_HAL_BAD_ARG;
+    if (!sim->media_present) return RB_HAL_NO_MEDIA;
+    if (fault(sim, RB_SIM_FAULT_REMOVE)) return RB_HAL_IO;
+    f = find(sim, name);
+    if (!f) return RB_HAL_NOT_FOUND;
+    if (f->mode) return RB_HAL_BAD_STATE;
+    f->exists = 0;
+    f->name[0] = '\0';
+    f->size = 0;
+    f->cursor = 0;
+    ++f->generation;
+    if (!f->generation) ++f->generation;
+    return RB_HAL_OK;
 }
 static void *allocate(void *ctx, size_t bytes)
 {
@@ -204,18 +256,25 @@ void rb_sim_hal_init(rb_sim_hal *sim)
     sim->api.read = read_file;
     sim->api.write = write_file;
     sim->api.close = close_file;
+    sim->api.sync = sync_file;
+    sim->api.rename_noreplace = rename_noreplace;
+    sim->api.remove = remove_file;
     sim->api.alloc = allocate;
     sim->api.release = release;
     sim->api.enqueue = enqueue;
 }
 void rb_sim_hal_inject_fault(rb_sim_hal *sim, rb_sim_fault fault_type)
 {
-    if (sim && fault_type >= RB_SIM_FAULT_NONE && fault_type <= RB_SIM_FAULT_QUEUE)
+    if (sim && fault_type >= RB_SIM_FAULT_NONE && fault_type <= RB_SIM_FAULT_REMOVE)
         sim->fail_once = fault_type;
 }
 void rb_sim_hal_short_read_once(rb_sim_hal *sim, size_t max_bytes)
 {
     if (sim) sim->max_next_read = max_bytes;
+}
+void rb_sim_hal_short_write_once(rb_sim_hal *sim, size_t max_bytes)
+{
+    if (sim) sim->max_next_write = max_bytes;
 }
 void rb_sim_hal_cut_write_once(rb_sim_hal *sim, size_t max_bytes)
 {
@@ -238,6 +297,7 @@ void rb_sim_hal_power_cycle(rb_sim_hal *sim)
     sim->head = 0;
     sim->count = 0;
     sim->max_next_read = 0;
+    sim->max_next_write = 0;
     sim->cut_write_pending = 0;
     sim->fail_once = RB_SIM_FAULT_NONE;
     for (i = 0; i < RB_SIM_ALLOC_SLOTS; ++i) sim->busy[i] = 0;

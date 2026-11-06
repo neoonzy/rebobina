@@ -34,6 +34,10 @@ typedef struct rb_hal {
     rb_hal_result (*write)(void *ctx, rb_hal_file handle,
                            const void *buffer, size_t length, size_t *count);
     rb_hal_result (*close)(void *ctx, rb_hal_file handle);
+    /* sync concluido antes de fechar; rename nao substitui destino existente. */
+    rb_hal_result (*sync)(void *ctx, rb_hal_file handle);
+    rb_hal_result (*rename_noreplace)(void *ctx, const char *source, const char *target);
+    rb_hal_result (*remove)(void *ctx, const char *name);
     void *(*alloc)(void *ctx, size_t size);
     void (*release)(void *ctx, void *ptr);
     rb_hal_result (*enqueue)(void *ctx, rb_hal_task fn, void *arg);

@@ -12,8 +12,10 @@ O projeto ainda está em fase de prototipagem; nenhuma versão para instalação
 - Sprint 7 (antecipação host): 100.000 eventos de interface e UBSan, com testes aprovados na CI;
 - HTTP local somente leitura com validação de eventos e testes C, Python e de interface;
 - HAL em RAM com 4 arquivos, memória e tarefas limitadas, falhas de leitura/escrita, remoção de mídia e power cycle simulados;
-- Selftest do motor Soup Engine upstream fixado (13 verificações de imagem/parsing), integração de `se.c` + HAL em host e geração de JPEG sintético 8×8 através da HAL, com teste de falha parcial; **sem CR2 real, processamento de filme ou firmware embarcado**;
-- Plano de desenvolvimento sem CompactFlash, ADR 0002 e fronteiras do Soup Engine;
+- Selftest do motor Soup Engine upstream fixado (13 verificações de imagem/parsing), integração de `se.c` + HAL em host e geração de JPEG sintético 8×8 através da HAL, com teste de falha parcial; **sem CR2 real nem firmware embarcado**;
+- Publicação exclusiva de JPEG em duas fases (arquivo temporário, sync, close, rename), sem sobrescrever destino, com testes de falhas e recuperação explícita no mock RAM;
+- Perfil original `soup800.fs` aplicado a RGB sintético 8×8 com look real Soup e JPEG de 1.006 bytes; sem CR2 nem câmera;
+- Plano de desenvolvimento sem CompactFlash, ADR 0002, ADR 0004 e fronteiras do Soup Engine;
 - Documentação de compatibilidade e versão.
 
 **Não há arquivos `AUTOEXEC.BIN` ou `.FIR` do Rebobina.**

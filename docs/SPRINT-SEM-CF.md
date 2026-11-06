@@ -26,8 +26,9 @@ Não interromper o desenvolvimento por ausência de hardware de teste, nem dar p
 - [x] Compilar e executar **os selftests do motor original Soup** no host (checkout GPLv2 fixado, sem copiar para o Rebobina): [CI](https://github.com/neoonzy/rebobina/actions/runs/42228272935).
 - [x] Compilar e executar um **teste de integração HAL Rebobina + `se_arena`/`se_rd` reais** com dados sintéticos.
 - [x] Gerar um **JPEG sintético 8×8 com `jpeg_enc.c` do Soup**, validar seu cabeçalho e testar escrita interrompida sem sobrescrever origem fictícia ([CI](https://github.com/neoonzy/rebobina/actions/runs/42229454141)).
-- [ ] Integrar o motor completo no processo Rebobina, com processamento de CR2/JPEG e testes comparativos.
-- [ ] Fazer simulação de perfis fotográficos e erros de processamento (o selftest upstream não substitui essa integração).
+- [ ] Integrar o motor completo no processo Rebobina, com processamento de CR2/JPEG **reais** e testes comparativos de bytes.
+- [x] Aplicar um perfil fotográfico real **Soup 800** a RGB sintético 8×8, salvar JPEG com publicação em duas fases e testar falhas da saída no host ([guia](SAIDA-SEGURA.md)).
+- [ ] Validar o processamento de uma fotografia real/CR2 e integrar os demais perfis sem perder originais.
 - [ ] Validar o firmware 1.1.1 no corpo 5D e confirmar o primeiro boot do Rebobina.
 - [ ] Testar menus, desligamento e módulos na câmera.
 

@@ -3,6 +3,7 @@
  * Nao acessa CR2, ROM Canon, CF ou cameras. Usar somente para testes.
  */
 #include "rebobina/hal_sim.h"
+#include "rebobina/output.h"
 #include "se.h"
 #include "jpeg_enc.h"
 #include "jpeg_dec.h"
@@ -10,18 +11,14 @@
 #include <stdio.h>
 
 typedef struct sink_context {
-    rb_hal *hal;
-    rb_hal_file file;
+    rb_output *output;
     int failures;
 } sink_context;
 
 static int jpeg_sink(void *ctx, const uint8_t *data, size_t length)
 {
     sink_context *s = ctx;
-    size_t written = 0;
-    rb_hal_result status = s->hal->write(s->hal->ctx, s->file,
-                                         data, length, &written);
-    if (status != RB_HAL_OK || written != length) {
+    if (rb_output_append(s->output, data, length) != RB_HAL_OK) {
         s->failures++;
         return -1;
     }
@@ -62,7 +59,8 @@ static se_err encode(sink_context *ctx)
 int main(void)
 {
     rb_sim_hal sim;
-    rb_hal_file src, dst, rd;
+    rb_hal_file src, rd;
+    rb_output output = {0};
     rb_hal *hal;
     sink_context sink;
     se_jdec_info info;
@@ -74,15 +72,15 @@ int main(void)
     assert(hal->create(hal->ctx, "ORIGINAL.CR2", &src) == RB_HAL_OK);
     assert(hal->write(hal->ctx, src, original, sizeof(original), &chunk) == RB_HAL_OK);
     assert(hal->close(hal->ctx, src) == RB_HAL_OK);
-    assert(hal->create(hal->ctx, "PREVIEW.JPG", &dst) == RB_HAL_OK);
-    sink.hal = hal;
-    sink.file = dst;
+    assert(rb_output_begin(&output, hal, "PREVIEW.JPG") == RB_HAL_OK);
+    sink.output = &output;
     sink.failures = 0;
     assert(encode(&sink) == SE_OK);
     assert(sink.failures == 0);
+    assert(rb_output_commit(&output) == RB_HAL_OK);
+    assert(rb_sim_hal_file_size(&sim, "PREVIEW.JPG.TMP") == 0);
     size = rb_sim_hal_file_size(&sim, "PREVIEW.JPG");
     assert(size > 100 && size < RB_SIM_FILE_BYTES);
-    assert(hal->close(hal->ctx, dst) == RB_HAL_OK);
     assert(hal->open_read(hal->ctx, "PREVIEW.JPG", &rd) == RB_HAL_OK);
     while (total < size) {
         assert(hal->read(hal->ctx, rd, jpeg_bytes + total, size - total, &chunk) == RB_HAL_OK);
@@ -97,17 +95,30 @@ int main(void)
     assert(rb_sim_hal_file_size(&sim, "ORIGINAL.CR2") == sizeof(original));
 
     /* Falha de gravação depois de bytes parciais, sem sobrescrever original. */
-    assert(hal->create(hal->ctx, "BROKEN.JPG", &dst) == RB_HAL_OK);
-    sink.file = dst;
+    assert(rb_output_begin(&output, hal, "BROKEN.JPG") == RB_HAL_OK);
     sink.failures = 0;
     rb_sim_hal_cut_write_once(&sim, 12);
     assert(encode(&sink) == SE_E_IO);
     assert(sink.failures > 0);
-    assert(rb_sim_hal_file_size(&sim, "BROKEN.JPG") == 12);
+    assert(rb_sim_hal_file_size(&sim, "BROKEN.JPG.TMP") == 12);
+    assert(rb_sim_hal_file_size(&sim, "BROKEN.JPG") == 0);
+    assert(rb_output_abort(&output) == RB_HAL_OK);
+    assert(rb_sim_hal_file_size(&sim, "BROKEN.JPG.TMP") == 0);
+
+    /* O codificador termina, mas a publicacao deve falhar antes do rename. */
+    assert(rb_output_begin(&output, hal, "RENAME.JPG") == RB_HAL_OK);
+    sink.failures = 0;
+    assert(encode(&sink) == SE_OK);
+    rb_sim_hal_inject_fault(&sim, RB_SIM_FAULT_RENAME);
+    assert(rb_output_commit(&output) == RB_HAL_IO);
+    assert(rb_sim_hal_file_size(&sim, "RENAME.JPG") == 0);
+    assert(rb_sim_hal_file_size(&sim, "RENAME.JPG.TMP") > 100);
     rb_sim_hal_power_cycle(&sim);
+    assert(rb_output_discard_orphan(hal, "RENAME.JPG") == RB_HAL_OK);
+    assert(rb_sim_hal_file_size(&sim, "RENAME.JPG.TMP") == 0);
     assert(rb_sim_hal_file_size(&sim, "ORIGINAL.CR2") == sizeof(original));
     assert(hal->create(hal->ctx, "ORIGINAL.CR2", &src) == RB_HAL_EXISTS);
     puts("OK: JPEG 8x8 real do Soup gravado em HAL RAM, SOI/EOI e cabecalho validados");
-    puts("OK: escrita JPEG parcial falhou e arquivo original ficou intocado");
+    puts("OK: JPEG parcial/rename falharam, temporarios descartados, original preservado");
     return 0;
 }

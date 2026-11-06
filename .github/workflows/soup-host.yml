@@ -6,6 +6,8 @@ on:
       - "tools/soup_host.py"
       - "tests/soup_*.c"
       - "src/host/hal_sim.c"
+      - "src/core/output.c"
+      - "include/rebobina/output.h"
       - "include/rebobina/hal*.h"
       - "docs/SOUP-ADAPTACAO.md"
       - ".github/workflows/soup-host.yml"

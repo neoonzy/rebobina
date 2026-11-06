@@ -1,6 +1,6 @@
 # Preparação da adaptação do Soup Engine ao Rebobina
 
-**Sprint 6 — motor original executado no host (selftest), integração fotográfica ao Rebobina ainda pendente.**
+**Sprint 6 — motor original e perfil Soup 800 aplicados a pixels sintéticos no host, com saída JPEG em duas fases; CR2 e câmera permanecem pendentes.**
 
 Fonte pinada para análise: [`jiijii0/soup-engine@6422c86b...`](https://github.com/jiijii0/soup-engine/tree/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src). A integração existente na 5D utiliza hooks da versão de 2012 do Magic Lantern e não pode ser transferida automaticamente para o Rebobina.
 
@@ -9,6 +9,10 @@ Fonte pinada para análise: [`jiijii0/soup-engine@6422c86b...`](https://github.c
 A rotina `tools/soup_host.py` obtém o commit GPLv2 `6422c86b4530a5bdb4c5619f5287044ae7c661e3`, confirma seu hash, compila `Canon-EOS-5D/src/filmdev` e executa o selftest do próprio upstream. [CI aprovada](https://github.com/neoonzy/rebobina/actions/runs/42228272935): **13 verificações passaram**, incluindo demosaico, LUT 3D, transformação sRGB, codificação/decodificação JPEG, curva de tons, telas do Soup, arquivo de stock e dados corrompidos/truncados.
 
 **Integração fotográfica sintética:** [CI 42229454141](https://github.com/neoonzy/rebobina/actions/runs/42229454141) também compila `tests/soup_jpeg_hal.c` com os arquivos originais `jpeg_enc.c` e `jpeg_dec.c`. Um padrão RGB8 sintético 8×8 é codificado pelo Soup e gravado através da HAL Rebobina em RAM; o cabeçalho JPEG é lido e conferido. Ao injetar uma escrita parcial de 12 bytes, o encoder retorna erro e o arquivo de origem fictício permanece intocado. **Isso não é um filtro de filme nem processamento de CR2.**
+
+**Perfil de filme no host:** agora `tests/soup_stock_output.c` lê o arquivo original `stocks/soup800.fs`, usa o parser, o look com halation e o codificador JPEG do Soup e grava um JPEG sintético pelo fluxo `rb_output` em duas fases do Rebobina. No teste Linux passaram 8×8 pixels, **183 componentes RGB modificados** e JPEG de **1.006 bytes**. [CI](https://github.com/neoonzy/rebobina/actions/runs/42237005969). É a primeira aplicação de um stock real no protótipo host, mas **não há abertura de arquivo CR2 nem fotografia do usuário**.
+
+**Alerta de compilação:** GCC 15 emite `-Wstringop-overflow` no código upstream de borda de halation (`engine/look.c`). O teste deixa esse aviso visível e não modifica `engine/`; é uma pendência de revisão e não pode ser tomada como prova de segurança de memória.
 
 O Soup possui uma pequena dependência macOS no utilitário `host/main.c` (campos de `statfs`). Nosso script aplica um **shim apenas na cópia temporária baixada em `build/soup-upstream/`**, sem alterar nenhum arquivo de `engine/`, nem o projeto original remoto.
 
@@ -53,6 +57,8 @@ A cópia de código Soup é temporária e obedece à GPLv2; **nenhum binário ne
 - [ ] Integrar o **motor completo** `engine/` ao fluxo de processamento Rebobina, preservando GPLv2 e atribuições.
 - [x] Executar selftests do motor upstream e smoke de `se_arena`/`se_rd` com HAL Rebobina.
 - [x] Codificar um JPEG sintético pelo Soup com saída na HAL e testar falha de gravação.
+- [x] Aplicar stock real `soup800.fs` a pixels sintéticos e gerar JPEG pelo fluxo em duas fases ([CI](https://github.com/neoonzy/rebobina/actions/runs/42237005969)).
+- [ ] Revisar aviso GCC na borda de halation; executar sanitizadores adicionais na integração do look.
 - [ ] Comparar saída JPEG/RAW do futuro adaptador Rebobina byte a byte com o processamento de referência.
 - [ ] Implementar módulo Soup no contrato `rb_module` ou numa ABI revista, após testes.
 - [ ] Validar tela, eventos e arquivos na 5D física **1.1.1** após o primeiro boot.

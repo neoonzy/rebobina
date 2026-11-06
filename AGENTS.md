@@ -14,3 +14,5 @@ Projeto: **Rebobina** — arquitetura modular experimental para Canon EOS 5D Cla
 
 10. A HAL em `src/host/hal_sim.c` é **somente RAM** e não representa o filesystem CF. Não inventar serviços Canon nem declarar falha simulada como teste de hardware.
 11. O Soup Engine upstream deve ser testado na revisão GPLv2 pinada; o script `tools/soup_host.py` aplica portabilidade Linux **somente no checkout temporário**. Não commitar binários/Soup vendor sem revisão de licença e origem.
+12. `rb_output` exige inicialização antes do primeiro uso e recuperação explícita de `.TMP` após falhas; não sobrescrever CR2 ou JPEG existentes. A semântica de `sync`/`rename_noreplace` em RAM **não comprova** suporte Canon FAT/VxWorks. Não executar limpeza automática em cartão físico.
+13. O código `engine/look.c` do Soup Engine emite aviso `-Wstringop-overflow` no GCC 15; registrar o aviso e não mascarar possíveis defeitos de memória na câmera.
