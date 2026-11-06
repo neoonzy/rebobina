@@ -109,6 +109,7 @@ def main():
         "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
         str(ROOT / "tests" / "soup_jpeg_hal.c"),
         str(ROOT / "src" / "host" / "hal_sim.c"),
+        str(ROOT / "src" / "core" / "output.c"),
         str(src / "engine" / "se.c"),
         str(src / "engine" / "jpeg_enc.c"),
         str(src / "engine" / "jpeg_dec.c"),
