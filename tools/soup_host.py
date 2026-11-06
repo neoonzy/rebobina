@@ -116,6 +116,24 @@ def main():
         "-lm", "-o", str(jpeg_out)
     ])
     execute([str(jpeg_out)])
+    stock_out = ROOT / "build" / "soup-stock-output"
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "tests" / "soup_stock_output.c"),
+        str(ROOT / "src" / "host" / "hal_sim.c"),
+        str(ROOT / "src" / "core" / "output.c"),
+        str(src / "engine" / "se.c"),
+        str(src / "engine" / "jpeg_enc.c"),
+        str(src / "engine" / "jpeg_dec.c"),
+        str(src / "engine" / "stock.c"),
+        str(src / "engine" / "look.c"),
+        str(src / "engine" / "grade.c"),
+        str(src / "engine" / "lut.c"),
+        str(src / "engine" / "wb.c"),
+        "-lm", "-o", str(stock_out)
+    ])
+    execute([str(stock_out), str(src / "stocks" / "soup800.fs")])
     print("OK: testes do motor Soup original + smoke de integracao HAL; "
           "SEM integracao no firmware/camera.", flush=True)
 
