@@ -50,6 +50,7 @@ typedef struct rb_sim_hal {
     unsigned char media_present;
     rb_sim_fault fail_once;
     size_t max_next_read;  /* 0 = sem limite de leitura */
+    size_t max_next_write; /* 0 = sem limite de escrita; sucesso parcial */
     size_t cut_next_write; /* usado somente se cut_write_pending=1 */
     unsigned char cut_write_pending;
 } rb_sim_hal;
@@ -57,6 +58,7 @@ typedef struct rb_sim_hal {
 void rb_sim_hal_init(rb_sim_hal *sim);
 void rb_sim_hal_inject_fault(rb_sim_hal *sim, rb_sim_fault fault);
 void rb_sim_hal_short_read_once(rb_sim_hal *sim, size_t max_bytes);
+void rb_sim_hal_short_write_once(rb_sim_hal *sim, size_t max_bytes);
 void rb_sim_hal_cut_write_once(rb_sim_hal *sim, size_t max_bytes);
 void rb_sim_hal_set_media(rb_sim_hal *sim, int present);
 /* Fecha handles e descarta tarefas, preserva bytes parciais no armazenamento simulado. */

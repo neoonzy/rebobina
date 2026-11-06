@@ -50,6 +50,12 @@ static void test_commit_and_exclusive(void)
     assert(buf[0]=='S' && buf[1]=='O' && buf[2]=='U' && buf[3]=='P');
     assert(api->close(api->ctx, f) == RB_HAL_OK);
     assert(rb_sim_hal_file_size(&sim, "ORIG.CR2") == 4);
+    /* Sucesso parcial de write deve ser completado pelo loop do output. */
+    assert(rb_output_begin(&collision, api, "SHORT.JPG") == RB_HAL_OK);
+    rb_sim_hal_short_write_once(&sim, 2);
+    assert(rb_output_append(&collision, "123456", 6) == RB_HAL_OK);
+    assert(rb_output_commit(&collision) == RB_HAL_OK);
+    assert(rb_sim_hal_file_size(&sim, "SHORT.JPG") == 6);
     assert(rb_output_begin(&collision, api, "FILM.JPG") == RB_HAL_OK);
     assert(rb_output_append(&collision, "NEW!", 4) == RB_HAL_OK);
     assert(rb_output_commit(&collision) == RB_HAL_EXISTS);

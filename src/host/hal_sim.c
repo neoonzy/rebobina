@@ -136,6 +136,8 @@ static rb_hal_result write_file(void *ctx, rb_hal_file handle,
     interrupted = sim->cut_write_pending;
     n = length;
     if (interrupted && n > sim->cut_next_write) n = sim->cut_next_write;
+    if (sim->max_next_write && n > sim->max_next_write) n = sim->max_next_write;
+    sim->max_next_write = 0;
     sim->cut_write_pending = 0;
     for (i = 0; i < n; ++i) f->bytes[f->cursor+i] = ((const unsigned char *)buffer)[i];
     f->cursor += n;
@@ -270,6 +272,10 @@ void rb_sim_hal_short_read_once(rb_sim_hal *sim, size_t max_bytes)
 {
     if (sim) sim->max_next_read = max_bytes;
 }
+void rb_sim_hal_short_write_once(rb_sim_hal *sim, size_t max_bytes)
+{
+    if (sim) sim->max_next_write = max_bytes;
+}
 void rb_sim_hal_cut_write_once(rb_sim_hal *sim, size_t max_bytes)
 {
     if (!sim) return;
@@ -291,6 +297,7 @@ void rb_sim_hal_power_cycle(rb_sim_hal *sim)
     sim->head = 0;
     sim->count = 0;
     sim->max_next_read = 0;
+    sim->max_next_write = 0;
     sim->cut_write_pending = 0;
     sim->fail_once = RB_SIM_FAULT_NONE;
     for (i = 0; i < RB_SIM_ALLOC_SLOTS; ++i) sim->busy[i] = 0;
