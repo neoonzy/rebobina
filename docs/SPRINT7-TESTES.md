@@ -17,7 +17,8 @@ Os testes atuais ainda são **host**, não testes de estresse numa Canon real.
 - [ ] Reproduzir essas condições no backend de câmera e testar suspensão/retomada reais.
 - [ ] Isolamento de filas de eventos de câmera e menu, sem trabalho de I/O em callback de botões.
 - [ ] Medição de pilhas e memória de módulos em hardware.
-- [ ] Testes de recuperação com procedimento controlado e documentação de incidentes.
+- [x] Testes host de publicação exclusiva, limpeza de temporários, falha de sync/rename, escrita curta, interrupção de mídia e simulação de recuperação após power cycle ([SAIDA-SEGURA](SAIDA-SEGURA.md)).
+- [ ] Testes de recuperação **físicos** com procedimento controlado e documentação de incidentes.
 - [ ] Critérios de aceitação com evidências fotográficas, logs e versões dos binários.
 
 **Condição:** só declarar Sprint 7 concluída quando o firmware estiver operando na 5D e os casos críticos tiverem testes reais. Testes positivos host não demonstram segurança em câmera.

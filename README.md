@@ -9,6 +9,14 @@ O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a 
 > [!IMPORTANT]
 > **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
 
+## Saída protegida e primeiro perfil real de filme (host)
+
+O Rebobina agora testa a publicação de JPEG em **duas fases**: arquivo temporário `.TMP`, sincronização simulada, fechamento e renomeação **sem substituir arquivo existente**. O código tem recuperação explícita de temporários após interrupção, porém **não há garantia de atomicidade no CompactFlash real**.
+
+Uma integração host aplica o arquivo original `stocks/soup800.fs` através do motor Soup Engine a **pixels RGB sintéticos 8×8**, gerando um JPEG pelo codificador original e salvando-o nessa HAL em RAM. O teste alterou 183 componentes de cor e gerou um JPEG de 1.006 bytes. Não são fotos reais nem um CR2 da câmera.
+
+Veja [saída segura: contrato e limites](docs/SAIDA-SEGURA.md) e [ADR 0004: publicação exclusiva](docs/decisions/0004-publicacao-exclusiva.md).
+
 ## HAL simulada e processamento de referência do Soup Engine
 
 O Rebobina possui um **contrato C** de arquivos, memória e fila de tarefas e um mock **inteiramente em RAM**. Ele permite injetar falhas, leituras curtas, gravações parcialmente interrompidas e simular reinicialização **sem escrever no cartão CF**.
@@ -24,7 +32,7 @@ O motor original do Soup Engine para a 5D também pode ser compilado e testado *
 python3 tools/soup_host.py --fetch
 ```
 
-Esse comando requer Git, compilador C, Make, Python e **acesso à internet**. Os testes incluem a **geração de um JPEG sintético de 8×8 pixels** pelo codificador real do Soup Engine, gravado somente na HAL em RAM, com teste de gravação interrompida e preservação de um arquivo fictício. Não importa o motor para o firmware Rebobina nem processa fotografias reais do usuário. Consulte [HAL SIMULADA](docs/HAL-SIMULADA.md), [Soup Engine no host](docs/SOUP-ADAPTACAO.md) e [ADR 0003](docs/decisions/0003-hal-deterministica.md).
+Esse comando requer Git, compilador C, Make, Python e **acesso à internet**. Os testes incluem a **geração de um JPEG sintético de 8×8 pixels** pelo codificador real do Soup Engine, gravado somente na HAL em RAM, com teste de gravação interrompida e preservação de um arquivo fictício. Não importa o motor para o firmware Rebobina nem processa fotografias reais do usuário. Consulte [HAL SIMULADA](docs/HAL-SIMULADA.md), [Soup Engine no host](docs/SOUP-ADAPTACAO.md), [saída segura](docs/SAIDA-SEGURA.md) e [ADR 0003](docs/decisions/0003-hal-deterministica.md).
 
 ## Simulador visual — desenvolvimento sem leitor CF
 
@@ -120,6 +128,8 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 
 - [Arquitetura proposta](docs/ARQUITETURA.md)
 - [HAL simulada: contrato, falhas e testes](docs/HAL-SIMULADA.md)
+- [JPEG em duas fases e recuperação de temporários](docs/SAIDA-SEGURA.md)
+- [ADR 0004: publicação sem sobrescrita](docs/decisions/0004-publicacao-exclusiva.md)
 - [ADR 0003: HAL determinística e tratamento de falhas](docs/decisions/0003-hal-deterministica.md)
 - [Simulador visual: usar, arquitetura e testes](docs/SIMULADOR-VISUAL.md)
 - [Plano de continuidade sem leitor CF](docs/SPRINT-SEM-CF.md)
