@@ -46,6 +46,35 @@ def validate_source(source):
     return src
 
 
+def linux_host_compat(src):
+    """Patch estritamente no checkout TEMPORARIO em build/. Nao toca engine/."""
+    if not sys.platform.startswith("linux"):
+        return
+    host = src / "host" / "main.c"
+    original = host.read_text(encoding="utf-8")
+    header = "#include <sys/mount.h>"
+    anchor = "static int check_card(const char *root)"
+    if (original.count(header) != 1 or original.count(anchor) != 1:
+        raise RuntimeError("source Soup mudou: patch host Linux nao e aplicavel")
+    helper = """/* Compatibilidade Linux SOMENTE para o diagnostico checkcard no host.
+ * A implementacao do motor em engine/ nao e alterada. */
+static const char *rb_host_fs_name(const struct statfs *sfs)
+{
+    if (sfs->f_type == 0x4d44L) return "msdos";
+    if (sfs->f_type == 0x2011BAB0L) return "exfat";
+    return "unknown";
+}
+"""
+    edited = original.replace(header, header + "\n#include <sys/vfs.h>\n#include <strings.h>")
+    edited = edited.replace(anchor, helper + "\n" + anchor)
+    edited = edited.replace("sfs.f_fstypename", "rb_host_fs_name(&sfs)")
+    if edited.count("rb_host_fs_name(&sfs)") != 2:
+        raise RuntimeError("quantidade de acessos ao tipo de filesystem mudou")
+    host.write_text(edited, encoding="utf-8")
+    print("Aplicado shim Linux apenas em host/main.c temporario, sem alterar engine/",
+          flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Prova host: Soup Engine fixado + HAL Rebobina")
     parser.add_argument("--fetch", action="store_true",
@@ -60,6 +89,8 @@ def main():
     if args.fetch:
         fetch_upstream()
     src = validate_source(args.source.resolve() if args.source else CHECKOUT)
+    if args.fetch:
+        linux_host_compat(src)
     print("Soup source fixado:", COMMIT, flush=True)
     execute(["make", "-C", str(src), "test"], timeout=240)
     out = ROOT / "build" / "soup-hal-smoke"
