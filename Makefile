@@ -9,7 +9,7 @@ CORE = src/core/registry.c
 DEMO = src/host/main.c modules/hello/hello.c $(CORE)
 TEST = tests/test_registry.c $(CORE)
 UI_TEST = tests/test_ui.c src/core/ui.c
-ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/manager.o build/arm/hal_sim.o build/arm/probe.o
+ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/manager.o build/arm/output.o build/arm/hal_sim.o build/arm/probe.o
 
 .PHONY: all demo hal-demo test sim-ui web-sim check-modules audit-platform arm-objects plugin-demo test-plugins clean
 
@@ -85,6 +85,14 @@ build/rebobina-hal-demo: src/host/hal_demo.c src/host/hal_sim.c include/rebobina
 hal-demo: build/rebobina-hal-demo
 	./build/rebobina-hal-demo
 
+build/test-output: tests/test_output.c src/core/output.c src/host/hal_sim.c include/rebobina/output.h include/rebobina/hal_sim.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ tests/test_output.c src/core/output.c src/host/hal_sim.c
+
+build/arm/output.o: src/core/output.c include/rebobina/output.h include/rebobina/hal.h
+	@mkdir -p build/arm
+	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
+
 build/arm/hal_sim.o: src/host/hal_sim.c include/rebobina/hal_sim.h include/rebobina/hal.h
 	@mkdir -p build/arm
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
@@ -124,12 +132,13 @@ check-modules:
 audit-platform:
 	python3 tools/platform_audit.py check
 
-test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/rebobina-sim-bridge test-plugins
+test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/rebobina-sim-bridge test-plugins
 	./build/test-registry
 	./build/test-ui
 	./build/test-ui-stress
 	./build/test-manager
 	./build/test-hal
+	./build/test-output
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:

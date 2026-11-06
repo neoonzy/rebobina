@@ -18,7 +18,10 @@ typedef enum rb_sim_fault {
     RB_SIM_FAULT_READ,
     RB_SIM_FAULT_WRITE,
     RB_SIM_FAULT_ALLOC,
-    RB_SIM_FAULT_QUEUE
+    RB_SIM_FAULT_QUEUE,
+    RB_SIM_FAULT_SYNC,
+    RB_SIM_FAULT_RENAME,
+    RB_SIM_FAULT_REMOVE
 } rb_sim_fault;
 
 typedef struct rb_sim_file {
