@@ -1,0 +1,29 @@
+name: Soup Engine upstream fixado — testes host
+
+on:
+  pull_request:
+    paths:
+      - "tools/soup_host.py"
+      - "tests/soup_hal_smoke.c"
+      - "src/host/hal_sim.c"
+      - "include/rebobina/hal*.h"
+      - "docs/SOUP-ADAPTACAO.md"
+      - ".github/workflows/soup-host.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  upstream-soup-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ferramentas da build host
+        run: |
+          git --version
+          cc --version | head -n 1
+          python3 --version
+      - name: Fetch de revisao FIXADA, selftest upstream e integracao HAL
+        run: python3 tools/soup_host.py --fetch
