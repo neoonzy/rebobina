@@ -19,6 +19,8 @@ typedef struct rb_output {
     unsigned char published;
 } rb_output;
 
+/* Inicializar antes do primeiro begin; nao reiniciar com escrita pendente. */
+void rb_output_init(rb_output *output);
 /* Nao sobrescreve um arquivo final existente. Usar nomes curtos ASCII. */
 rb_hal_result rb_output_begin(rb_output *output, rb_hal *hal, const char *final_name);
 rb_hal_result rb_output_append(rb_output *output, const void *bytes, size_t n);

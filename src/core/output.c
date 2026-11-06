@@ -33,13 +33,18 @@ static int valid_hal(const rb_hal *hal)
     return hal && hal->ctx && hal->create && hal->write && hal->close &&
            hal->sync && hal->rename_noreplace && hal->remove;
 }
+void rb_output_init(rb_output *out)
+{
+    rb_output initial = {0};
+    if (out) *out = initial;
+}
 rb_hal_result rb_output_begin(rb_output *out, rb_hal *hal, const char *final_name)
 {
     rb_hal_result rc;
-    rb_output initial = {0};
     if (!out || !valid_hal(hal)) return RB_HAL_BAD_ARG;
-    /* Antes de zerar o objeto, quem chamou deve ter encerrado tentativa anterior. */
-    *out = initial;
+    /* O caller deve ter inicializado uma vez (rb_output_init ou {0}). */
+    if (out->staged || out->open) return RB_HAL_BAD_STATE;
+    rb_output_init(out);
     if (!output_names(final_name, out->final_name, out->temp_name))
         return RB_HAL_BAD_ARG;
     out->hal = hal;

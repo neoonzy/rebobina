@@ -27,7 +27,7 @@ static void test_commit_and_exclusive(void)
 {
     rb_sim_hal sim;
     rb_hal *api;
-    rb_output out, collision;
+    rb_output out = {0}, collision = {0};
     rb_hal_file f;
     size_t n = 0;
     char buf[8] = {0};
@@ -35,6 +35,7 @@ static void test_commit_and_exclusive(void)
     api = &sim.api;
     seed(api, "ORIG.CR2", "RAW!", 4);
     assert(rb_output_begin(&out, api, "FILM.JPG") == RB_HAL_OK);
+    assert(rb_output_begin(&out, api, "DUP.JPG") == RB_HAL_BAD_STATE);
     assert(readable(api, "FILM.JPG") == 0);
     assert(rb_output_append(&out, "SOUP", 4) == RB_HAL_OK);
     assert(rb_output_append(&out, NULL, 0) == RB_HAL_OK);
@@ -67,7 +68,7 @@ static void test_write_and_sync_faults(void)
 {
     rb_sim_hal sim;
     rb_hal *api;
-    rb_output out;
+    rb_output out = {0};
     rb_sim_hal_init(&sim);
     api = &sim.api;
     assert(rb_output_begin(&out, api, "F1.JPG") == RB_HAL_OK);
