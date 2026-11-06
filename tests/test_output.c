@@ -128,6 +128,8 @@ static void test_power_cut_orphans(void)
     assert(rb_sim_hal_file_size(&sim, "RAW.CR2") == 3);
     assert(rb_output_discard_orphan(api, "OUT.JPG") == RB_HAL_OK);
     assert(!readable(api, "OUT.JPG.TMP"));
+    /* Power cycle invalidou contexto RAM da transacao: inicializar nova sessao. */
+    rb_output_init(&out);
     assert(rb_output_begin(&out, api, "OUT.JPG") == RB_HAL_OK);
     assert(rb_output_append(&out, "GOOD", 4) == RB_HAL_OK);
     assert(rb_output_commit(&out) == RB_HAL_OK);
