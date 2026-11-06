@@ -117,8 +117,11 @@ def main():
     ])
     execute([str(jpeg_out)])
     stock_out = ROOT / "build" / "soup-stock-output"
+    # O GCC 15 emite -Wstringop-overflow na copia de borda do halo em
+    # look.c. Mantemos o aviso visivel sem alterar o upstream GPLv2.
     execute([
         "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-Wno-error=stringop-overflow",
         "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
         str(ROOT / "tests" / "soup_stock_output.c"),
         str(ROOT / "src" / "host" / "hal_sim.c"),
