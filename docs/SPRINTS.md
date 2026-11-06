@@ -12,11 +12,11 @@
 | --- | --- | --- | --- |
 | **0** | Fundação | Repositório, API protótipo, manifesto, CI e documentação | **Concluída no escopo host** |
 | **1** | Engenharia reversa e especificação | Mapa de boot, APIs, memória e decisões de reaproveitamento GPLv2 da 5D | **Em andamento: levantamento e testes offline realizados; binário-base ainda não identificado** |
-| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Em andamento: objetos ARM, simulador visual e testes host; HAL Canon pendente** |
+| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Mock HAL em RAM e objetos ARM testados; port Canon pendente** |
 | **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | A fazer; depende de hardware |
 | **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | **Prova visual no host concluída; LCD/HAL em câmera pendentes** |
 | **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | **Gerenciador host e loader .so Linux testados; ARM/câmera pendentes** |
-| **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | **Fronteiras de integração documentadas; sem motor integrado** |
+| **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | **13 selftests do upstream aprovados + smoke HAL; integração fotográfica pendente** |
 | **7** | Confiabilidade | Testes de interrupção, memória, compatibilidade e recuperação | **Testes host antecipados; testes reais pendentes** |
 | **8** | Distribuição | Releases por firmware e instalador auxiliar seguro | A fazer |
 | **9** | Ecossistema | SDK público, módulos extras e estudo de outras Canon | Futuro |
@@ -60,7 +60,7 @@
 
 - [x] Criar alvos de compilação de objetos ARM946E-S no host; **linker script base permanece pendente** até validação de memória.
 - [x] Separar os protótipos host de `camera/5DC.111`, explicitando que só objetos são compilados.
-- [ ] Implementar stubs ou simulador mínimo para chamadas da HAL.
+- [x] Implementar **mock de arquivos, memória e tarefas** para host (não chamadas Canon): [HAL SIMULADA](HAL-SIMULADA.md).
 - [ ] Validar dependências externas, tamanho de imagem, seções, ABI e limites de memória na compilação.
 - [x] Automatizar testes de interface e ciclo de vida sob host; HAL Canon ainda pendente.
 - [x] Registrar Clang/CPU alvo e verificação ELF; **a reprodutibilidade binária total da câmera ainda está pendente**.
@@ -79,8 +79,10 @@ Foram iniciadas, sem depender do CF:
 - [x] Servidor local somente leitura, protocolos de eventos e testes HTTP.
 - [x] Gerenciador C de módulos individuais no host, com Hello demonstrativo.
 - [x] ADR de simulação e fronteiras do Soup Engine ([adaptação](SOUP-ADAPTACAO.md)).
-- [ ] HAL simulada de arquivos/tarefas com falhas injetáveis.
-- [ ] Motor do Soup Engine compilado no host e testes determinísticos de JPEG/RAW.
+- [x] HAL simulada de arquivos, memória e tarefas com falhas injetáveis.
+- [x] Executar selftests originais de processamento do Soup Engine no host ([CI](https://github.com/neoonzy/rebobina/actions/runs/42228272935)).
+- [x] Gerar JPEG sintético do Soup por callback de escrita da HAL em RAM e validar erros de gravação ([CI](https://github.com/neoonzy/rebobina/actions/runs/42229454141)).
+- [ ] Integrar o Soup ao fluxo Rebobina e comparar resultados JPEG/RAW.
 
 [Plano de execução completo](SPRINT-SEM-CF.md). Esses componentes antecipam Sprints 4–6 **apenas no host**, sem alterar seus critérios físicos.
 
@@ -185,4 +187,4 @@ Foram iniciadas, sem depender do CF:
 
 ## Próxima ação
 
-**Sem leitor CF:** continuar por [HAL simulada e testes do motor Soup](SPRINT-SEM-CF.md). Em paralelo, pesquisar o binário-base 2012 e a fonte 5DC.111. O primeiro boot físico mantém a dependência da câmera atualizada para **1.1.1**, do leitor CF e de um plano de recuperação.
+**Sem leitor CF:** continuar pelo [adaptador fotográfico completo entre HAL e Soup](SPRINT-SEM-CF.md), com testes de arquivos incompletos. Em paralelo, pesquisar o binário-base 2012 e a fonte 5DC.111. O primeiro boot físico mantém a dependência da câmera atualizada para **1.1.1**, do leitor CF e de um plano de recuperação.

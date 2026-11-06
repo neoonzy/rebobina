@@ -8,12 +8,14 @@ Você precisa de um compilador C11, `make` e Python >= 3.9.
 
 ```sh
 make demo
+make hal-demo     # HAL mock, sem arquivos reais nem cartão
 make test
 make check-modules
 make audit-platform
 make arm-objects   # compilação de objetos, NÃO firmware
 make sim-ui        # simulador de interface no terminal
 make web-sim       # interface visual em navegador local
+python3 tools/soup_host.py --fetch  # teste upstream Soup (requer Internet)
 ```
 
 Antes de enviar alterações, documente o propósito, os arquivos alterados, os comandos realmente executados e suas saídas. Não descreva testes não executados como aprovados.
