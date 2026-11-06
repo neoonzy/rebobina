@@ -110,7 +110,7 @@ static void test_write_and_sync_faults(void)
 static void test_power_cut_orphans(void)
 {
     rb_sim_hal sim;
-    rb_output out;
+    rb_output out = {0};
     rb_hal *api;
     rb_sim_hal_init(&sim);
     api = &sim.api;
@@ -140,7 +140,7 @@ static void test_validation_and_limits(void)
 {
     rb_sim_hal sim;
     rb_hal *api;
-    rb_output out;
+    rb_output out = {0};
     rb_hal_file src, old, dst;
     size_t n = 0;
     rb_sim_hal_init(&sim);
