@@ -54,7 +54,7 @@ def linux_host_compat(src):
     original = host.read_text(encoding="utf-8")
     header = "#include <sys/mount.h>"
     anchor = "static int check_card(const char *root)"
-    if (original.count(header) != 1 or original.count(anchor) != 1:
+    if original.count(header) != 1 or original.count(anchor) != 1:
         raise RuntimeError("source Soup mudou: patch host Linux nao e aplicavel")
     helper = """/* Compatibilidade Linux SOMENTE para o diagnostico checkcard no host.
  * A implementacao do motor em engine/ nao e alterada. */
@@ -68,7 +68,7 @@ static const char *rb_host_fs_name(const struct statfs *sfs)
     edited = original.replace(header, header + "\n#include <sys/vfs.h>\n#include <strings.h>")
     edited = edited.replace(anchor, helper + "\n" + anchor)
     edited = edited.replace("sfs.f_fstypename", "rb_host_fs_name(&sfs)")
-    if edited.count("rb_host_fs_name(&sfs)") != 2:
+    if edited.count("rb_host_fs_name(&sfs)") != 4:
         raise RuntimeError("quantidade de acessos ao tipo de filesystem mudou")
     host.write_text(edited, encoding="utf-8")
     print("Aplicado shim Linux apenas em host/main.c temporario, sem alterar engine/",
