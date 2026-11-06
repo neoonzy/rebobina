@@ -6,7 +6,7 @@ Este roadmap apresenta as etapas amplas. A divisão operacional em ciclos, taref
 
 As etapas diferenciam protótipo host, simulação e firmware experimental. Nada neste repositório está pronto para instalação em câmera.
 
-**Estado atual:** fundação host concluída; investigação da 5D Classic em andamento; Sprint 2 parcialmente implementada (objetos ARM, interface host); provas de módulos e estabilidade no Linux host; nenhuma versão de câmera disponível.
+**Estado atual:** fundação host concluída; investigação da 5D Classic em andamento; compilação de objetos ARM, simulador visual web conectado ao C e gerenciador host de módulos. Sem leitor CF e com o corpo real ainda em firmware 1.1.0, **não houve boot físico do Rebobina**. Consulte [o plano de desenvolvimento paralelo](SPRINT-SEM-CF.md).
 
 ## Etapa 0 — Fundação
 
@@ -15,7 +15,7 @@ As etapas diferenciam protótipo host, simulação e firmware experimental. Nada
 - [x] Criar protótipo C de registro de módulos no host;
 - [x] Criar manifestos JSON e ferramenta de validação;
 - [x] Adicionar testes e CI host (primeira execução aprovada);
-- [ ] Definir política de versões e changelog.
+- [x] Definir política de versões e changelog.
 
 ## Etapa 1 — Estudar a plataforma de base
 
