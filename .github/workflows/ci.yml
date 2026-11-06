@@ -26,6 +26,7 @@ jobs:
           make plugin-demo
           make sim-ui
           make arm-objects
+          # make test inclui servidor HTTP local + bridge C, sem abrir navegador.
 
   undefined-behavior:
     runs-on: ubuntu-latest

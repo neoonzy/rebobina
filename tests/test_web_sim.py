@@ -79,7 +79,7 @@ class SimulatorTests(unittest.TestCase):
             self.assertIn("Rebobina", page)
             self.assertIn("frame-ancestors 'none'", response.headers["Content-Security-Policy"])
         with urlopen(self.url + "/app.js", timeout=5) as response:
-            self.assertIn("rebobina", response.read().decode("utf-8").lower())
+            self.assertIn("/api/state", response.read().decode("utf-8"))
 
     def test_post_is_rejected(self):
         from urllib.request import Request
