@@ -11,6 +11,8 @@ O projeto ainda está em fase de prototipagem; nenhuma versão para instalação
 - Sprint 5 (prova host): carregamento experimental de módulos compartilhados no Linux e gerenciador de ativação/desativação individual, ainda não embarcados;
 - Sprint 7 (antecipação host): 100.000 eventos de interface e UBSan, com testes aprovados na CI;
 - HTTP local somente leitura com validação de eventos e testes C, Python e de interface;
+- HAL em RAM com 4 arquivos, memória e tarefas limitadas, falhas de leitura/escrita, remoção de mídia e power cycle simulados;
+- Selftest do motor Soup Engine upstream fixado (13 verificações de imagem/parsing) e smoke `se.c` + HAL em host; sem integração de imagens no Rebobina;
 - Plano de desenvolvimento sem CompactFlash, ADR 0002 e fronteiras do Soup Engine;
 - Documentação de compatibilidade e versão.
 

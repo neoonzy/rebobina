@@ -22,11 +22,24 @@ Não interromper o desenvolvimento por ausência de hardware de teste, nem dar p
 - [x] Integrar o exemplo Hello ao menu visual **sem acessar hardware**.
 - [x] Criar testes HTTP, CLI e C para navegação, rejeição de entradas e falhas.
 - [x] Documentar ambiente, limites e interface.
-- [ ] Implementar uma HAL simulada de arquivos/tarefas com falhas injetáveis.
-- [ ] Isolar/compilar o motor real de processamento Soup Engine no host com testes determinísticos.
-- [ ] Fazer simulação de perfis fotográficos e erros de processamento.
+- [x] Implementar uma HAL simulada de arquivos/memória/tarefas com falhas injetáveis; [contrato e limites](HAL-SIMULADA.md).
+- [x] Compilar e executar **os selftests do motor original Soup** no host (checkout GPLv2 fixado, sem copiar para o Rebobina): [CI](https://github.com/neoonzy/rebobina/actions/runs/42228272935).
+- [x] Compilar e executar um **teste de integração HAL Rebobina + `se_arena`/`se_rd` reais** com dados sintéticos.
+- [ ] Integrar o motor completo no processo Rebobina, com processamento de CR2/JPEG e testes comparativos.
+- [ ] Fazer simulação de perfis fotográficos e erros de processamento (o selftest upstream não substitui essa integração).
 - [ ] Validar o firmware 1.1.1 no corpo 5D e confirmar o primeiro boot do Rebobina.
 - [ ] Testar menus, desligamento e módulos na câmera.
+
+## Executar os testes de host
+
+```sh
+make hal-demo
+make test
+make arm-objects
+python3 tools/soup_host.py --fetch
+```
+
+O último comando requer acesso à internet e baixa apenas código-fonte Soup Engine de revisão fixada para `build/`. Um adaptador de compatibilidade no arquivo `host/main.c` desse checkout temporário permite compilar o utilitário desktop macOS no Linux; **`engine/` permanece inalterado**. Ao repetir o comando, remova o checkout temporário com `make clean`. Os selftests executam demosaico, LUT, JPEG e parsing corrompido, mas não provam a adaptação na Canon.
 
 ## Critérios de entrega
 

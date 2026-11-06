@@ -9,6 +9,23 @@ O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a 
 > [!IMPORTANT]
 > **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
 
+## HAL simulada e processamento de referência do Soup Engine
+
+O Rebobina possui um **contrato C** de arquivos, memória e fila de tarefas e um mock **inteiramente em RAM**. Ele permite injetar falhas, leituras curtas, gravações parcialmente interrompidas e simular reinicialização **sem escrever no cartão CF**.
+
+```sh
+make hal-demo
+make test
+```
+
+O motor original do Soup Engine para a 5D também pode ser compilado e testado **separadamente** no computador, numa revisão GPLv2 fixada. O fluxo baixa o upstream em `build/soup-upstream/`, adapta **apenas o utilitário desktop** ao Linux dentro dessa cópia temporária, roda seus 13 selftests e compila um teste de ligação entre `se_arena/se_rd` e a HAL Rebobina:
+
+```sh
+python3 tools/soup_host.py --fetch
+```
+
+Esse comando requer Git, compilador C, Make, Python e **acesso à internet**. Não importa o motor para o firmware Rebobina nem processa fotografias reais do usuário. Consulte [HAL SIMULADA](docs/HAL-SIMULADA.md), [Soup Engine no host](docs/SOUP-ADAPTACAO.md) e [ADR 0003](docs/decisions/0003-hal-deterministica.md).
+
 ## Simulador visual — desenvolvimento sem leitor CF
 
 O projeto agora oferece um **laboratório visual no navegador**. A interface é responsiva e suas ações são calculadas por `src/core/ui.c` e `src/core/manager.c`, executados no computador.
@@ -37,6 +54,8 @@ O Magic Lantern já possui um sistema de módulos em várias versões. O Rebobin
 - Um **protótipo do registro de módulos em C**, executado no computador;
 - Um **simulador de interface em terminal** e um **simulador visual no navegador**, ambos conectados ao núcleo C;
 - Um **gerenciador host de módulos** para ativar, desativar e testar falhas de módulos individualmente;
+- Uma **HAL simulada C** para arquivos, tarefas e memória, com falhas injetáveis;
+- Execução em CI dos **13 selftests do Soup Engine original**, sem incorporação ao firmware;
 - Objetos relocáveis para **ARM946E-S**, sem firmware instalável;
 - Uma **prova de módulos externos `.so` no Linux host**, sem suporte a câmera;
 - Contrato inicial de API com verificação de versão, identificador e ciclo de vida;
@@ -71,6 +90,7 @@ Requisitos: compilador C11, `make` e Python 3.9 ou superior. Os comandos **não 
 
 ```sh
 make demo          # compila e executa o protótipo C no computador
+make hal-demo      # demonstra a HAL com dados somente em RAM
 make test          # testa o registro C e a ferramenta Python
 make check-modules # valida manifestos
 make audit-platform # verifica consistência do inventário estático da 5D
@@ -99,6 +119,8 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 ## Documentação
 
 - [Arquitetura proposta](docs/ARQUITETURA.md)
+- [HAL simulada: contrato, falhas e testes](docs/HAL-SIMULADA.md)
+- [ADR 0003: HAL determinística e tratamento de falhas](docs/decisions/0003-hal-deterministica.md)
 - [Simulador visual: usar, arquitetura e testes](docs/SIMULADOR-VISUAL.md)
 - [Plano de continuidade sem leitor CF](docs/SPRINT-SEM-CF.md)
 - [ADR 0002: interface web conectada ao core C](docs/decisions/0002-simulador-host.md)
@@ -122,6 +144,6 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 
 ## Créditos e licença
 
-O Rebobina não é afiliado à Canon nem à equipe Magic Lantern. Reconhecemos o trabalho da comunidade do [Magic Lantern](https://github.com/reticulatedpines/magiclantern_simplified) e dos autores do [Soup Engine](https://github.com/jiijii0/soup-engine). **O simulador e o gerenciador host desta branch são implementações originais do Rebobina; nenhum código do Soup Engine foi integrado nesses componentes.** A pesquisa de integração utiliza referências externas e mantém as obrigações GPLv2. Integrações futuras deverão respeitar direitos autorais, atribuições e licenças dos componentes reutilizados.
+O Rebobina não é afiliado à Canon nem à equipe Magic Lantern. Reconhecemos o trabalho da comunidade do [Magic Lantern](https://github.com/reticulatedpines/magiclantern_simplified) e dos autores do [Soup Engine](https://github.com/jiijii0/soup-engine). **O simulador, a HAL e o gerenciador host são implementações originais do Rebobina; o código do Soup Engine é baixado em uma cópia temporária externa para executar testes do upstream fixado. Nenhum código Soup foi incluído no firmware Rebobina.** A pesquisa de integração utiliza referências externas e mantém as obrigações GPLv2. Integrações futuras deverão respeitar direitos autorais, atribuições e licenças dos componentes reutilizados.
 
 Código original do Rebobina licenciado sob **GPL-2.0-only** — veja [LICENSE](LICENSE). Projeto experimental, **sem garantias**.

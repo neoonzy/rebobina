@@ -13,7 +13,8 @@ Os testes atuais ainda são **host**, não testes de estresse numa Canon real.
 ## Futuras verificações obrigatórias
 
 - [x] Executar UBSan para componentes host em CI: execução **42129417751**, job `undefined-behavior`, concluído com sucesso. Cobertura e ASan ainda pendentes.
-- [ ] Interrupções de I/O, card cheio, leitura parcial, falhas de alocação, suspend/resume (simulado).
+- [x] Injetar falhas de I/O, limite de arquivo, leitura parcial, escrita interrompida, falha de alocação e power cycle no mock host ([CI 42227335334](https://github.com/neoonzy/rebobina/actions/runs/42227335334)).
+- [ ] Reproduzir essas condições no backend de câmera e testar suspensão/retomada reais.
 - [ ] Isolamento de filas de eventos de câmera e menu, sem trabalho de I/O em callback de botões.
 - [ ] Medição de pilhas e memória de módulos em hardware.
 - [ ] Testes de recuperação com procedimento controlado e documentação de incidentes.

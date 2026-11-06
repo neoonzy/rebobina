@@ -27,7 +27,7 @@ Canon EOS 5D Classic (arquitetura pretendida)
 Computador: testes, simulador e ferramenta auxiliar de instalação
 ```
 
-Componentes implementados no computador: **registro de módulos** (`src/core/registry.c`), **gerenciador individual de módulos** (`src/core/manager.c`), **modelo de interface** (`src/core/ui.c`), simulador terminal (`src/host/menu_sim.c`), [simulador visual web](SIMULADOR-VISUAL.md) via ponte C + servidor localhost e carregador **Linux host** de bibliotecas `.so` (`src/host/plugin_loader.c`). A compilação ARM produz objetos relocáveis, não um executável. O **bootstrap, HAL Canon, carregador embarcado e tela física** permanecem arquitetura-alvo.
+Componentes implementados no computador: **registro de módulos** (`src/core/registry.c`), **gerenciador individual de módulos** (`src/core/manager.c`), **modelo de interface** (`src/core/ui.c`), simulador terminal (`src/host/menu_sim.c`), [simulador visual web](SIMULADOR-VISUAL.md) via ponte C + servidor localhost e carregador **Linux host** de bibliotecas `.so` (`src/host/plugin_loader.c`). A HAL em RAM (`include/rebobina/hal.h`, `src/host/hal_sim.c`) simula serviços de arquivo/memória/tarefas e permite falhas injetáveis sem tocar em mídia. O motor original Soup Engine é compilado externamente no host para selftests, **não como extensão Rebobina**. A compilação ARM produz objetos relocáveis, não um executável. O **bootstrap, HAL Canon, carregador embarcado e tela física** permanecem arquitetura-alvo.
 
 ## Separação de responsabilidades
 
