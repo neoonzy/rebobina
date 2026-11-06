@@ -13,6 +13,7 @@ make check-modules
 make audit-platform
 make arm-objects   # compilação de objetos, NÃO firmware
 make sim-ui        # simulador de interface no terminal
+make web-sim       # interface visual em navegador local
 ```
 
 Antes de enviar alterações, documente o propósito, os arquivos alterados, os comandos realmente executados e suas saídas. Não descreva testes não executados como aprovados.

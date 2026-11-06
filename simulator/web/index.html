@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#141816">
+  <title>Rebobina — Laboratório da EOS 5D</title>
+  <meta name="description" content="Simulador visual de interface do Rebobina, conectado ao núcleo C. Sem acesso à câmera Canon.">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="site">
+    <header class="masthead">
+      <div class="brand"><span class="brand-icon" aria-hidden="true">◉</span><span>REBOBINA<small>Laboratório de câmera</small></span></div>
+      <div class="header-meta"><span class="dot"></span> <span>SIMULADOR HOST</span> <span class="meta-split">5DC / 1.1.1</span></div>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="intro-heading">
+        <div class="eyebrow"><span class="hairline"></span> DESENVOLVIMENTO / SPRINT 2 + 4</div>
+        <div class="intro-grid">
+          <div><h1 id="intro-heading">Uma nova interface para uma câmera clássica<span>.</span></h1></div>
+          <div class="intro-copy">
+            <p>Experimente a navegação e o ciclo de vida dos módulos antes de escrever qualquer coisa no CompactFlash.</p>
+            <p class="small-note"><span class="signal">●</span> Os eventos são processados pelo mesmo núcleo C usado nos testes. Não há comunicação com a EOS 5D física.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="laboratory" aria-label="Simulador de interface da câmera">
+        <div class="panel-top"><span>01 / CÂMERA</span><span>INTERAÇÃO LOCAL <span class="panel-cross">+</span> SEM FIRMWARE</span></div>
+        <div class="camera-space">
+          <div class="camera-back">
+            <div class="top-camera">
+              <span class="model-label">EOS 5D <small>CLASSIC</small></span>
+              <div class="viewfinder" aria-hidden="true"><div class="viewfinder-glass"></div></div>
+              <div class="top-dial" aria-hidden="true"><span></span></div>
+            </div>
+            <div class="camera-main">
+              <div class="left-buttons">
+                <div class="control-name">CONTROLES</div>
+                <button data-event="b" aria-label="Voltar ou MENU"><span class="button-glyph">←</span><small>MENU</small></button>
+                <button data-event="b" aria-label="Sair da página"><span class="button-glyph">i</span><small>INFO</small></button>
+                <button data-event="t" aria-label="Lixeira: abrir ou fechar menu"><span class="button-glyph">▣</span><small>TRASH</small></button>
+              </div>
+              <div class="lcd-shell">
+                <div class="screen-bezel">
+                  <div class="lcd" aria-label="Tela LCD simulada">
+                    <div class="lcd-topline"><span>REBOBINA<span class="lcd-slash"> /</span> 5DC</span><span class="lcd-battery" aria-label="Bateria ilustrativa">▰▰▰</span></div>
+                    <div class="lcd-section"><span id="screen-kicker">SIM / MENU</span><span id="state-indicator">EM ESPERA</span></div>
+                    <div id="lcd-rows" class="lcd-rows" aria-live="polite" aria-atomic="true"><div class="lcd-row">Inicializando simulador…</div></div>
+                    <div class="lcd-footer"><span id="lcd-hint">LIXEIRA: ABRIR MENU</span><span>LAB / 001</span></div>
+                  </div>
+                </div>
+                <div class="screen-under"><span>2.5” / REPRESENTAÇÃO ARTÍSTICA</span><span>LCD SIMULADO</span></div>
+              </div>
+              <div class="right-buttons">
+                <div class="right-name">SELETOR</div>
+                <div class="control-ring" role="group" aria-label="Direcional da câmera">
+                  <button class="ring-up" data-event="u" aria-label="Mover seleção para cima">▲</button>
+                  <button class="ring-down" data-event="d" aria-label="Mover seleção para baixo">▼</button>
+                  <button class="ring-center" data-event="s" aria-label="Selecionar opção">SET</button>
+                </div>
+                <button class="back-button" data-event="b" aria-label="Voltar para o menu">↶ <span>VOLTAR</span></button>
+              </div>
+            </div>
+            <div class="camera-bottom"><span>◉ <span class="small-camera-text">PROTÓTIPO / NÃO CONECTADO</span></span><span class="camera-grip">REBOBINA — TEST UNIT</span></div>
+          </div>
+        </div>
+        <div class="touch-controls" role="group" aria-label="Controles grandes para celulares">
+          <button type="button" data-event="t">▣ <span>LIXEIRA</span></button>
+          <button type="button" data-event="u">↑ <span>CIMA</span></button>
+          <button type="button" data-event="d">↓ <span>BAIXO</span></button>
+          <button type="button" data-event="s">● <span>SET</span></button>
+          <button type="button" data-event="b">↶ <span>VOLTAR</span></button>
+        </div>
+        <div class="panel-bottom">
+          <div class="panel-status"><span class="led"></span><span id="connection">NÚCLEO C / CONECTANDO</span></div>
+          <button id="reset" class="reset-button" type="button">↺ REINICIAR SIMULAÇÃO</button>
+        </div>
+      </section>
+
+      <section class="below" aria-label="Informações do simulador">
+        <div class="info-panel">
+          <div class="section-heading">02 / CONTROLES</div>
+          <h2>Navegue como se estivesse na câmera.</h2>
+          <div class="key-grid">
+            <div><kbd>DEL</kbd><span>Abrir / fechar menu</span></div>
+            <div><kbd>↑</kbd><kbd>↓</kbd><span>Navegar</span></div>
+            <div><kbd>ENTER</kbd><span>Selecionar / alternar módulo</span></div>
+            <div><kbd>ESC</kbd><span>Voltar</span></div>
+          </div>
+        </div>
+        <div class="info-panel diagnostic">
+          <div class="section-heading">03 / DIAGNÓSTICO</div>
+          <h2>O que está acontecendo?</h2>
+          <dl class="metrics">
+            <div><dt>Página</dt><dd id="metric-page">—</dd></div>
+            <div><dt>Exemplo Hello</dt><dd id="metric-module">—</dd></div>
+            <div><dt>Eventos enviados</dt><dd id="metric-events">0</dd></div>
+            <div><dt>Canon / VxWorks</dt><dd class="limited">NÃO CONECTADA</dd></div>
+          </dl>
+          <p class="diagnostic-footnote">O estado é reconstruído em memória a cada requisição. Nenhum módulo é instalado na câmera, e nenhum arquivo é gravado no cartão.</p>
+        </div>
+      </section>
+      <section class="roadmap-note"><span>NOTA DE ENGENHARIA</span><p>Este ambiente simula a <strong>interface</strong> e as transições do núcleo C. Ele não emula o processador DIGIC II, o sistema VxWorks, o LCD real ou a câmera Canon EOS 5D.</p></section>
+    </main>
+    <footer><span>REBOBINA / OPEN SOURCE</span><span>DESENVOLVIMENTO LOCAL · SEM ACESSO AO HARDWARE</span><a href="https://github.com/neoonzy/rebobina" target="_blank" rel="noopener noreferrer">GITHUB ↗</a></footer>
+  </div>
+</body>
+</html>

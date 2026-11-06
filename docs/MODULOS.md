@@ -61,10 +61,18 @@ O executável `build/rebobina-plugin-host` carrega `build/plugins/hello.so` por 
 
 Consulte [o relatório do protótipo](SPRINT5-PROTOTIPO.md).
 
+## Gerenciamento individual no host (novo)
+
+`include/rebobina/manager.h` define `rb_manager`, que reutiliza o validador `rb_registry_add` e mantém um vetor de módulos ativos. Operações: `rb_manager_add`, `rb_manager_enable`, `rb_manager_disable`, `rb_manager_is_active`, `rb_manager_stop_all`.
+
+Os testes verificam ativação individual, rejeição de ativação duplicada, erro de ABI/índice, falha de `start`, bloqueio de registro durante execução e desligamento em ordem reversa. **Módulos que falham em `start` são responsáveis por limpar recursos que tenham adquirido antes de retornar erro.** Não há isolamento de memória ou execução separada.
+
+O [simulador visual](SIMULADOR-VISUAL.md) exercita `rb_manager` com um Hello ligado estaticamente à ponte C: **não** carrega bibliotecas arbitrárias pela interface web, e a tela de Soup Engine informa que o motor não foi integrado.
+
 ## Restrições da primeira etapa
 
 - Sem acesso a hardware;
-- Sem carregamento dinâmico de binários;
+- Sem carregamento dinâmico de binários **na câmera** (há uma prova `.so` somente Linux host);
 - Sem ABI estável garantida entre versões;
 - Sem permissões aplicadas por sistema operacional;
 - Sem mecanismo de assinatura ou isolamento de código executável.

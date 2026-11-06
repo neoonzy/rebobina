@@ -9,9 +9,9 @@ CORE = src/core/registry.c
 DEMO = src/host/main.c modules/hello/hello.c $(CORE)
 TEST = tests/test_registry.c $(CORE)
 UI_TEST = tests/test_ui.c src/core/ui.c
-ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/probe.o
+ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/manager.o build/arm/probe.o
 
-.PHONY: all demo test sim-ui check-modules audit-platform arm-objects plugin-demo test-plugins clean
+.PHONY: all demo test sim-ui web-sim check-modules audit-platform arm-objects plugin-demo test-plugins clean
 
 all: build/rebobina-host
 
@@ -62,6 +62,18 @@ build/test-ui-stress: tests/test_ui_stress.c src/core/ui.c include/rebobina/ui.h
 	@mkdir -p build
 	$(CC) $(CFLAGS) -o $@ tests/test_ui_stress.c src/core/ui.c
 
+build/test-manager: tests/test_manager.c src/core/manager.c $(CORE) include/rebobina/manager.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ tests/test_manager.c src/core/manager.c $(CORE)
+
+build/rebobina-sim-bridge: src/host/simulator_bridge.c src/core/ui.c src/core/manager.c $(CORE) include/rebobina/ui.h include/rebobina/manager.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ src/host/simulator_bridge.c src/core/ui.c src/core/manager.c $(CORE)
+
+build/arm/manager.o: src/core/manager.c include/rebobina/manager.h include/rebobina/module.h
+	@mkdir -p build/arm
+	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
+
 build/arm/registry.o: src/core/registry.c include/rebobina/module.h
 	@mkdir -p build/arm
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
@@ -88,16 +100,20 @@ demo: build/rebobina-host
 sim-ui: build/rebobina-ui-host
 	./build/rebobina-ui-host tddsbt
 
+web-sim: build/rebobina-sim-bridge
+	python3 tools/simulator_server.py --port 8765
+
 check-modules:
 	python3 tools/modules.py check
 
 audit-platform:
 	python3 tools/platform_audit.py check
 
-test: build/test-registry build/test-ui build/test-ui-stress test-plugins
+test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/rebobina-sim-bridge test-plugins
 	./build/test-registry
 	./build/test-ui
 	./build/test-ui-stress
+	./build/test-manager
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:

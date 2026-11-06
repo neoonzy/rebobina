@@ -12,11 +12,11 @@
 | --- | --- | --- | --- |
 | **0** | Fundação | Repositório, API protótipo, manifesto, CI e documentação | **Concluída no escopo host** |
 | **1** | Engenharia reversa e especificação | Mapa de boot, APIs, memória e decisões de reaproveitamento GPLv2 da 5D | **Em andamento: levantamento e testes offline realizados; binário-base ainda não identificado** |
-| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Em andamento: objetos ARM e simulador de interface host funcionando** |
+| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Em andamento: objetos ARM, simulador visual e testes host; HAL Canon pendente** |
 | **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | A fazer; depende de hardware |
-| **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | A fazer |
-| **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | **Prova antecipada: plugin .so no Linux; câmera pendente** |
-| **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | A fazer |
+| **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | **Prova visual no host concluída; LCD/HAL em câmera pendentes** |
+| **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | **Gerenciador host e loader .so Linux testados; ARM/câmera pendentes** |
+| **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | **Fronteiras de integração documentadas; sem motor integrado** |
 | **7** | Confiabilidade | Testes de interrupção, memória, compatibilidade e recuperação | **Testes host antecipados; testes reais pendentes** |
 | **8** | Distribuição | Releases por firmware e instalador auxiliar seguro | A fazer |
 | **9** | Ecossistema | SDK público, módulos extras e estudo de outras Canon | Futuro |
@@ -69,6 +69,21 @@
 
 **Aceite:** build determinístico e verificações automatizadas; nenhuma alegação de que o artefato é seguro para colocar no cartão.
 
+### Desenvolvimento paralelo sem CompactFlash (06/11/2026)
+
+A câmera real ainda estava em firmware **1.1.0** e não havia leitor CF para atualizar/testar. Portanto a [PR experimental de boot #1](https://github.com/neoonzy/rebobina/pull/1) **não foi validada em hardware nem mesclada como firmware pronto**.
+
+Foram iniciadas, sem depender do CF:
+
+- [x] Simulador visual de interface no navegador, comandado pelo core C ([manual](SIMULADOR-VISUAL.md)).
+- [x] Servidor local somente leitura, protocolos de eventos e testes HTTP.
+- [x] Gerenciador C de módulos individuais no host, com Hello demonstrativo.
+- [x] ADR de simulação e fronteiras do Soup Engine ([adaptação](SOUP-ADAPTACAO.md)).
+- [ ] HAL simulada de arquivos/tarefas com falhas injetáveis.
+- [ ] Motor do Soup Engine compilado no host e testes determinísticos de JPEG/RAW.
+
+[Plano de execução completo](SPRINT-SEM-CF.md). Esses componentes antecipam Sprints 4–6 **apenas no host**, sem alterar seus critérios físicos.
+
 ## Sprint 3 — Primeiro Rebobina na câmera
 
 **Objetivo:** atingir o primeiro marco real do produto: **um programa próprio executando na Canon EOS 5D Classic**.
@@ -98,7 +113,7 @@
 
 ## Sprint 5 — Sistema de extensões embarcadas
 
-**Progresso antecipado:** prova no Linux host de carregamento independente via `dlopen`, com testes positivos e negativos de ABI. **Não é o carregador da câmera.** Consulte [SPRINT5-PROTOTIPO.md](SPRINT5-PROTOTIPO.md).
+**Progresso antecipado:** prova no Linux host de carregamento independente via `dlopen`, além de gerenciador C com ativação/desativação individual, erro de inicialização e teste pela UI visual, com testes positivos e negativos de ABI. **Não é o carregador da câmera.** Consulte [SPRINT5-PROTOTIPO.md](SPRINT5-PROTOTIPO.md).
 
 **Objetivo:** adicionar funcionalidades sem alterar o executável principal a cada integração.
 
@@ -170,4 +185,4 @@
 
 ## Próxima ação
 
-**Concluir a Sprint 1:** identificar a procedência e o SHA-256 do `autoexec.bin` Magic Lantern 2012 usado no Soup Engine e obter fonte 5DC.111 rastreável; depois verificar a consistência com a documentação. O primeiro executável embarcado permanece como meta da Sprint 3.
+**Sem leitor CF:** continuar por [HAL simulada e testes do motor Soup](SPRINT-SEM-CF.md). Em paralelo, pesquisar o binário-base 2012 e a fonte 5DC.111. O primeiro boot físico mantém a dependência da câmera atualizada para **1.1.1**, do leitor CF e de um plano de recuperação.
