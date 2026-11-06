@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "tools/soup_host.py"
-      - "tests/soup_hal_smoke.c"
+      - "tests/soup_*.c"
       - "src/host/hal_sim.c"
       - "include/rebobina/hal*.h"
       - "docs/SOUP-ADAPTACAO.md"

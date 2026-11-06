@@ -103,6 +103,18 @@ def main():
         "-o", str(out)
     ])
     execute([str(out)])
+    jpeg_out = ROOT / "build" / "soup-jpeg-hal"
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "tests" / "soup_jpeg_hal.c"),
+        str(ROOT / "src" / "host" / "hal_sim.c"),
+        str(src / "engine" / "se.c"),
+        str(src / "engine" / "jpeg_enc.c"),
+        str(src / "engine" / "jpeg_dec.c"),
+        "-lm", "-o", str(jpeg_out)
+    ])
+    execute([str(jpeg_out)])
     print("OK: testes do motor Soup original + smoke de integracao HAL; "
           "SEM integracao no firmware/camera.", flush=True)
 
