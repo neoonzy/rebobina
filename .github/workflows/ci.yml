@@ -20,6 +20,7 @@ jobs:
       - name: Compilar, executar testes e verificar manifestos
         run: |
           make demo
+          make hal-demo
           make test
           make check-modules
           make audit-platform
