@@ -15,7 +15,9 @@ O projeto ainda está em fase de prototipagem; nenhuma versão para instalação
 - Selftest do motor Soup Engine upstream fixado (13 verificações de imagem/parsing), integração de `se.c` + HAL em host e geração de JPEG sintético 8×8 através da HAL, com teste de falha parcial; **sem CR2 real nem firmware embarcado**;
 - Publicação exclusiva de JPEG em duas fases (arquivo temporário, sync, close, rename), sem sobrescrever destino, com testes de falhas e recuperação explícita no mock RAM;
 - Perfil original `soup800.fs` aplicado a RGB sintético 8×8 com look real Soup e JPEG de 1.006 bytes; sem CR2 nem câmera;
-- Plano de desenvolvimento sem CompactFlash, ADR 0002, ADR 0004 e fronteiras do Soup Engine;
+- Validação defensiva de offset/dimensões do preview CR2, inspeção host somente leitura e teste end-to-end de envelope CR2 sintético com Soup 800;
+- ASan/UBSan em três stocks, achado de shift negativo indefinido no JPEG upstream, correção apenas na cópia de teste e JPEGs comparados byte a byte;
+- Plano de desenvolvimento sem CompactFlash, ADRs 0002–0005 e fronteiras do Soup Engine;
 - Documentação de compatibilidade e versão.
 
 **Não há arquivos `AUTOEXEC.BIN` ou `.FIR` do Rebobina.**

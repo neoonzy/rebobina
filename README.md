@@ -9,6 +9,19 @@ O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a 
 > [!IMPORTANT]
 > **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
 
+## Inspeção de CR2 e testes de sanitizadores (host)
+
+O Rebobina agora tem um **inspector de previews JPEG embutidos em CR2**, somente leitura, que verifica offsets, limites do arquivo e dimensões com o parser original do Soup Engine. A CI extrai um JPEG de um **envelope CR2 sintético, sem RAW Canon real**, aplica o perfil Soup 800 com a ferramenta de referência e gera outro JPEG, sem alterar a entrada.
+
+```sh
+python3 tools/soup_host.py --fetch
+./build/rebobina-cr2-inspect /caminho/para/foto.CR2
+```
+
+O primeiro comando requer Linux, Git, Make, C/Clang, Python e rede. O segundo apenas inspeciona metadados do preview num arquivo de até 64 MiB e **não modifica o CR2**. Nenhum CR2 real da sua câmera foi testado. Leia [inspeção do CR2](docs/CR2-INSPECAO-HOST.md), [ADR 0005](docs/decisions/0005-cr2-preview-validacao.md) e [verificação de memória Soup](docs/SOUP-SANITIZERS.md).
+
+Em testes com ASan/UBSan, encontramos um **deslocamento negativo indefinido** no encoder JPEG original do Soup. Uma correção experimental restrita a uma cópia temporária permite testar **Soup 800, Portra e Acros** e comparar seus JPEGs completos byte a byte com a saída original. Isso não corrige o upstream nem valida segurança na Canon.
+
 ## Saída protegida e primeiro perfil real de filme (host)
 
 O Rebobina agora testa a publicação de JPEG em **duas fases**: arquivo temporário `.TMP`, sincronização simulada, fechamento e renomeação **sem substituir arquivo existente**. O código tem recuperação explícita de temporários após interrupção, porém **não há garantia de atomicidade no CompactFlash real**.
@@ -26,7 +39,7 @@ make hal-demo
 make test
 ```
 
-O motor original do Soup Engine para a 5D também pode ser compilado e testado **separadamente** no computador, numa revisão GPLv2 fixada. O fluxo baixa o upstream em `build/soup-upstream/`, adapta **apenas o utilitário desktop** ao Linux dentro dessa cópia temporária, roda seus 13 selftests e compila um teste de ligação entre `se_arena/se_rd` e a HAL Rebobina:
+O motor original do Soup Engine para a 5D também pode ser compilado e testado **separadamente** no computador, numa revisão GPLv2 fixada. O fluxo baixa o upstream em `build/soup-upstream/`, aplica um shim de compatibilidade Linux ao utilitário desktop dentro da cópia temporária e prepara uma **cópia separada apenas para testes sanitizados** do codificador JPEG, roda seus 13 selftests e compila um teste de ligação entre `se_arena/se_rd` e a HAL Rebobina:
 
 ```sh
 python3 tools/soup_host.py --fetch
@@ -129,6 +142,9 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 - [Arquitetura proposta](docs/ARQUITETURA.md)
 - [HAL simulada: contrato, falhas e testes](docs/HAL-SIMULADA.md)
 - [JPEG em duas fases e recuperação de temporários](docs/SAIDA-SEGURA.md)
+- [Inspeção defensiva de CR2 e JPEG embutido](docs/CR2-INSPECAO-HOST.md)
+- [Testes de sanitizador e ajuste experimental do Soup](docs/SOUP-SANITIZERS.md)
+- [ADR 0005: validação de offsets CR2](docs/decisions/0005-cr2-preview-validacao.md)
 - [ADR 0004: publicação sem sobrescrita](docs/decisions/0004-publicacao-exclusiva.md)
 - [ADR 0003: HAL determinística e tratamento de falhas](docs/decisions/0003-hal-deterministica.md)
 - [Simulador visual: usar, arquitetura e testes](docs/SIMULADOR-VISUAL.md)

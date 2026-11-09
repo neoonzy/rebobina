@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     char stock_text[STOCK_MAX];
     size_t stock_bytes, written = 0, size, got, total = 0;
     unsigned x,y;
-    assert(argc == 2);
+    assert(argc == 2 || argc == 3);
     stock_bytes = read_stock(argv[1], stock_text, STOCK_MAX-1);
     se_stock_init(&stock);
     assert(se_stock_parse(stock_text, stock_bytes, &stock) == SE_OK);
@@ -129,6 +129,15 @@ int main(int argc, char **argv)
     assert(se_jpeg_dec_info(jpeg,size,&info)==SE_OK);
     assert(info.width==W && info.height==H);
     assert(rb_sim_hal_file_size(&sim,"RAW.CR2")==8);
+    /* Fixtures saem apenas para caminhos EXPLICITOS e nao sobrescrevem arquivos.
+     * Usado pelo CI para comparar JPEGs byte a byte com build sanitizado.
+     */
+    if (argc == 3) {
+        FILE *file = fopen(argv[2], "wbx");
+        assert(file != NULL);
+        assert(fwrite(jpeg, 1, size, file) == size);
+        assert(fclose(file) == 0);
+    }
     printf("OK: stock real do Soup '%s' aplicado a pixels sinteticos; "
            "%u canais alterados, %lu bytes JPEG em HAL RAM\n",
            stock.name,context.changed,(unsigned long)size);

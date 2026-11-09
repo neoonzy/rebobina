@@ -28,6 +28,8 @@ Não interromper o desenvolvimento por ausência de hardware de teste, nem dar p
 - [x] Gerar um **JPEG sintético 8×8 com `jpeg_enc.c` do Soup**, validar seu cabeçalho e testar escrita interrompida sem sobrescrever origem fictícia ([CI](https://github.com/neoonzy/rebobina/actions/runs/42229454141)).
 - [ ] Integrar o motor completo no processo Rebobina, com processamento de CR2/JPEG **reais** e testes comparativos de bytes.
 - [x] Aplicar um perfil fotográfico real **Soup 800** a RGB sintético 8×8, salvar JPEG com publicação em duas fases e testar falhas da saída no host ([guia](SAIDA-SEGURA.md)).
+- [x] Inspecionar o preview de envelope CR2 **sintético**; extrair, decodificar e desenvolver o JPEG pelo `previewcheck`, preservando entrada ([guia](CR2-INSPECAO-HOST.md)).
+- [x] Rodar Soup 800, Portra e Acros com ASan/UBSan, validar saída JPEG idêntica à referência e registrar UB do encoder ([guia](SOUP-SANITIZERS.md)).
 - [ ] Validar o processamento de uma fotografia real/CR2 e integrar os demais perfis sem perder originais.
 - [ ] Validar o firmware 1.1.1 no corpo 5D e confirmar o primeiro boot do Rebobina.
 - [ ] Testar menus, desligamento e módulos na câmera.

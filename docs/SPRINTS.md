@@ -16,7 +16,7 @@
 | **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | A fazer; depende de hardware |
 | **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | **Prova visual no host concluída; LCD/HAL em câmera pendentes** |
 | **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | **Gerenciador host e loader .so Linux testados; ARM/câmera pendentes** |
-| **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | **Stock Soup 800 em RGB sintético e JPEG no host; CR2/câmera pendentes** |
+| **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | **3 stocks e container CR2 sintético no host; CR2 real/câmera pendentes** |
 | **7** | Confiabilidade | Testes de interrupção, memória, compatibilidade e recuperação | **Testes host antecipados; testes reais pendentes** |
 | **8** | Distribuição | Releases por firmware e instalador auxiliar seguro | A fazer |
 | **9** | Ecossistema | SDK público, módulos extras e estudo de outras Canon | Futuro |
@@ -83,7 +83,9 @@ Foram iniciadas, sem depender do CF:
 - [x] Executar selftests originais de processamento do Soup Engine no host ([CI](https://github.com/neoonzy/rebobina/actions/runs/42228272935)).
 - [x] Gerar JPEG sintético do Soup por callback de escrita da HAL em RAM e validar erros de gravação ([CI](https://github.com/neoonzy/rebobina/actions/runs/42229454141)).
 - [x] Aplicar `soup800.fs` real a pixels RGB sintéticos, publicar JPEG com rename exclusivo e testar recuperação de temporários ([SAIDA-SEGURA](SAIDA-SEGURA.md)).
-- [ ] Integrar o Soup ao fluxo Rebobina e comparar resultados JPEG/RAW.
+- [x] Validar offset, tamanho e cabeçalho de JPEG no envelope CR2 sintético e produzir JPEG com o `previewcheck` original ([CR2-INSPECAO-HOST](CR2-INSPECAO-HOST.md)).
+- [x] Rodar três stocks e comparar JPEG byte a byte sob ASan/UBSan, com correção temporária de UB ([SOUP-SANITIZERS](SOUP-SANITIZERS.md)).
+- [ ] Integrar o Soup ao fluxo Rebobina e comparar resultados JPEG/RAW **de fotos reais**.
 
 [Plano de execução completo](SPRINT-SEM-CF.md). Esses componentes antecipam Sprints 4–6 **apenas no host**, sem alterar seus critérios físicos.
 
@@ -188,4 +190,4 @@ Foram iniciadas, sem depender do CF:
 
 ## Próxima ação
 
-**Sem leitor CF:** continuar pelo [adaptador fotográfico CR2/JPEG completo entre HAL e Soup](SPRINT-SEM-CF.md) e revisão de halation, usando [publicação em duas fases](SAIDA-SEGURA.md). Em paralelo, pesquisar o binário-base 2012 e a fonte 5DC.111. O primeiro boot físico mantém a dependência da câmera atualizada para **1.1.1**, do leitor CF e de um plano de recuperação.
+**Sem leitor CF:** o próximo marco é testar um **CR2 real autorizado da EOS 5D Classic**, integrar a decodificação ao fluxo de publicação e revisar a borda de halation. A [extração sintética](CR2-INSPECAO-HOST.md) e o [UB do encoder](SOUP-SANITIZERS.md) já estão documentados. Primeiro boot físico permanece condicionado ao firmware 1.1.1, leitor CF e plano de recuperação. Em paralelo, pesquisar o binário-base 2012 e a fonte 5DC.111. O primeiro boot físico mantém a dependência da câmera atualizada para **1.1.1**, do leitor CF e de um plano de recuperação.

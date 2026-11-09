@@ -6,9 +6,11 @@ Copia de codigo GPLv2 upstream e mantida em build/soup-upstream (ignoravel).
 """
 import argparse
 from pathlib import Path
+import hashlib
 import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://github.com/jiijii0/soup-engine.git"
@@ -20,6 +22,40 @@ def execute(argv, *, cwd=None, timeout=180):
     print("+", " ".join(str(x) for x in argv), flush=True)
     return subprocess.run([str(x) for x in argv], cwd=cwd, timeout=timeout,
                           check=True)
+
+
+def capture_output(argv):
+    """Executa e publica stdout de teste, devolvendo texto para comparacao."""
+    print("+", " ".join(str(x) for x in argv), flush=True)
+    result = subprocess.run([str(x) for x in argv], stdout=subprocess.PIPE,
+                            stderr=None, text=True, timeout=180, check=True)
+    print(result.stdout, end="", flush=True)
+    return result.stdout
+
+
+def sanitizer_encoder_copy(src):
+    """Corrige UB de shift negativo SOMENTE numa copia para sanitizadores.
+
+    O codigo GPLv2 upstream em engine/jpeg_enc.c permanece intacto.
+    """
+    original = (src / "engine" / "jpeg_enc.c").read_text(encoding="utf-8")
+    fixes = (
+        ("p[0] = (tmp10 + tmp11) << PASS1_BITS;",
+         "p[0] = (tmp10 + tmp11) * (1 << PASS1_BITS);"),
+        ("p[4] = (tmp10 - tmp11) << PASS1_BITS;",
+         "p[4] = (tmp10 - tmp11) * (1 << PASS1_BITS);"),
+    )
+    for old, new in fixes:
+        if original.count(old) != 1:
+            raise RuntimeError("o codigo JPEG do Soup mudou: correcao nao aplicavel")
+        original = original.replace(old, new)
+    folder = ROOT / "build" / "soup-sanitizer-compat"
+    folder.mkdir(parents=True, exist_ok=True)
+    out = folder / "jpeg_enc.c"
+    out.write_text(original, encoding="utf-8")
+    print("Ponte de sanitizador: jpeg_enc.c copiado com 2 shifts negativos substituidos "
+          "por multiplicacao. Engine upstream intacto.", flush=True)
+    return out
 
 
 def fetch_upstream():
@@ -136,7 +172,91 @@ def main():
         str(src / "engine" / "wb.c"),
         "-lm", "-o", str(stock_out)
     ])
-    execute([str(stock_out), str(src / "stocks" / "soup800.fs")])
+    stocks_to_test = ("soup800.fs", "portra.fs", "acros.fs")
+    # UBSan encontrou shift negativo em jpeg_enc.c:353; testamos o ajuste
+    # so numa copia em build/, sem alterar codigo do motor de referencia.
+    if not shutil.which("clang"):
+        raise RuntimeError("clang requerido para ASan/UBSan do processamento Soup")
+    compatible_encoder = sanitizer_encoder_copy(src)
+    san_out = ROOT / "build" / "soup-stock-sanitized"
+    execute([
+        "clang", "-std=c11", "-O1", "-g", "-Wall", "-Wextra",
+        "-fsanitize=address,undefined", "-fno-sanitize-recover=all",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "tests" / "soup_stock_output.c"),
+        str(ROOT / "src" / "host" / "hal_sim.c"),
+        str(ROOT / "src" / "core" / "output.c"),
+        str(src / "engine" / "se.c"),
+        str(compatible_encoder),
+        str(src / "engine" / "jpeg_dec.c"),
+        str(src / "engine" / "stock.c"),
+        str(src / "engine" / "look.c"),
+        str(src / "engine" / "grade.c"),
+        str(src / "engine" / "lut.c"),
+        str(src / "engine" / "wb.c"),
+        "-lm", "-o", str(san_out)
+    ])
+    with tempfile.TemporaryDirectory(prefix="rb-stock-comparison-", dir=str(ROOT / "build")) as tmp:
+        for stock in stocks_to_test:
+            base_output = Path(tmp) / (stock + ".baseline.jpg")
+            san_output = Path(tmp) / (stock + ".sanitized.jpg")
+            stock_path = src / "stocks" / stock
+            capture_output([str(stock_out), str(stock_path), str(base_output)])
+            capture_output([str(san_out), str(stock_path), str(san_output)])
+            if base_output.read_bytes() != san_output.read_bytes():
+                raise RuntimeError(f"JPEG do stock {stock} divergiu byte a byte após correção de UB")
+            print(f"OK: {stock}: {base_output.stat().st_size} bytes identicos", flush=True)
+    print("OK: 3 perfis Soup normais e ASan/UBSan, JPEGs comparados byte a byte.", flush=True)
+    # CR2 host: header TIFF sintetico contem JPEG feito pelo proprio Soup.
+    cr2_out = ROOT / "build" / "soup-cr2-preview"
+    cr2_sources = [
+        str(src / "engine" / "se.c"),
+        str(src / "engine" / "cr2.c"),
+        str(src / "engine" / "wb.c"),
+        str(src / "engine" / "jpeg_dec.c"),
+        str(src / "engine" / "jpeg_enc.c"),
+    ]
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "tests" / "soup_cr2_preview.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        *cr2_sources, "-lm", "-o", str(cr2_out)
+    ])
+    execute([str(cr2_out)])
+    inspect_out = ROOT / "build" / "rebobina-cr2-inspect"
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "src" / "host" / "cr2_inspect.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        *cr2_sources, "-lm", "-o", str(inspect_out)
+    ])
+    # CLI nao modifica arquivos; um argumento inválido e rejeitado.
+    result = subprocess.run([str(inspect_out)], capture_output=True, text=True)
+    if result.returncode != 2:
+        raise RuntimeError("cr2-inspect nao rejeitou chamada sem arquivo")
+    print("OK: CR2 header sintetico + CLI de inspecao somente leitura.", flush=True)
+    # Caminho inteiro do upstream: envelope TIFF/CR2 artificial -> preview
+    # JPEG -> Soup 800 -> JPEG de saida. NAO e uma foto Canon/RAW verdadeira.
+    execute(["make", "-C", str(src), "out/previewcheck"], timeout=120)
+    with tempfile.TemporaryDirectory(prefix="rb-synthetic-cr2-", dir=str(ROOT / "build")) as tmp:
+        sample = Path(tmp) / "synthetic-no-raw.CR2"
+        developed = Path(tmp) / "soup800.jpg"
+        execute([str(cr2_out), str(sample)])
+        original_sha = hashlib.sha256(sample.read_bytes()).hexdigest()
+        execute([str(inspect_out), str(sample)])
+        execute([
+            str(src / "out" / "previewcheck"), str(sample),
+            str(src / "stocks" / "soup800.fs"), "1", str(developed)
+        ])
+        jpeg = developed.read_bytes()
+        if len(jpeg) <= 100 or not jpeg.startswith(bytes((0xff, 0xd8))) or not jpeg.endswith(bytes((0xff, 0xd9))):
+            raise RuntimeError("previewcheck nao produziu JPEG sintético reconhecivel")
+        if hashlib.sha256(sample.read_bytes()).hexdigest() != original_sha:
+            raise RuntimeError("previewcheck ou cr2-inspect alteraram a entrada")
+        print("OK: envelope CR2 sintetico -> preview -> Soup 800 -> JPEG",
+              f"({len(jpeg)} bytes, arquivo de entrada inalterado)", flush=True)
     print("OK: testes do motor Soup original + smoke de integracao HAL; "
           "SEM integracao no firmware/camera.", flush=True)
 
