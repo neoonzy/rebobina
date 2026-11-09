@@ -95,7 +95,7 @@ static int on_rgb(void *arg, const unsigned char *rgb, int nrows, int width)
     d->rows+=(size_t)nrows;
     return 0;
 }
-int main(void)
+int main(int argc, char **argv)
 {
     static fixture f; /* evita buffer grande na pilha em hardware futuro */
     static unsigned char memory[65536];
@@ -140,6 +140,20 @@ int main(void)
     assert(rb_cr2_host_find_preview(NULL,len,&p)!=0);
     assert(rb_cr2_host_find_preview(f.container,len,NULL)!=0);
     assert(rb_cr2_host_find_preview(f.container,len,&p)==0);
+    if(argc>2) {
+        fputs("Uso (somente testes): soup-cr2-preview [arquivo_sintetico.CR2]\\n", stderr);
+        return 2;
+    }
+    if(argc==2) {
+        FILE *target = fopen(argv[1],"wbx"); /* criacao exclusiva, nunca sobrescreve */
+        if(!target) return 3;
+        if(fwrite(f.container,1,len,target)!=len) {
+            (void)fclose(target);
+            return 4;
+        }
+        if(fclose(target)!=0) return 5;
+        puts("Fixture CR2 sintetico escrito exclusivamente para testes (SEM RAW real)");
+    }
     puts("OK: extracao e decode de preview JPEG em CR2 sintetico; offsets TIFF, SOI, dimensoes e truncamento");
     return 0;
 }
