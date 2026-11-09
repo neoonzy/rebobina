@@ -24,6 +24,40 @@ def execute(argv, *, cwd=None, timeout=180):
                           check=True)
 
 
+def capture_output(argv):
+    """Executa e publica stdout de teste, devolvendo texto para comparacao."""
+    print("+", " ".join(str(x) for x in argv), flush=True)
+    result = subprocess.run([str(x) for x in argv], stdout=subprocess.PIPE,
+                            stderr=None, text=True, timeout=180, check=True)
+    print(result.stdout, end="", flush=True)
+    return result.stdout
+
+
+def sanitizer_encoder_copy(src):
+    """Corrige UB de shift negativo SOMENTE numa copia para sanitizadores.
+
+    O codigo GPLv2 upstream em engine/jpeg_enc.c permanece intacto.
+    """
+    original = (src / "engine" / "jpeg_enc.c").read_text(encoding="utf-8")
+    fixes = (
+        ("p[0] = (tmp10 + tmp11) << PASS1_BITS;",
+         "p[0] = (tmp10 + tmp11) * (1 << PASS1_BITS);"),
+        ("p[4] = (tmp10 - tmp11) << PASS1_BITS;",
+         "p[4] = (tmp10 - tmp11) * (1 << PASS1_BITS);"),
+    )
+    for old, new in fixes:
+        if original.count(old) != 1:
+            raise RuntimeError("o codigo JPEG do Soup mudou: correcao nao aplicavel")
+        original = original.replace(old, new)
+    folder = ROOT / "build" / "soup-sanitizer-compat"
+    folder.mkdir(parents=True, exist_ok=True)
+    out = folder / "jpeg_enc.c"
+    out.write_text(original, encoding="utf-8")
+    print("Ponte de sanitizador: jpeg_enc.c copiado com 2 shifts negativos substituidos "
+          "por multiplicacao. Engine upstream intacto.", flush=True)
+    return out
+
+
 def fetch_upstream():
     if (CHECKOUT / ".git").exists():
         raise RuntimeError("build/soup-upstream ja existe; nao sobrescrever fonte existente")
@@ -139,12 +173,15 @@ def main():
         "-lm", "-o", str(stock_out)
     ])
     stocks_to_test = ("soup800.fs", "portra.fs", "acros.fs")
-    for stock in stocks_to_test:
-        execute([str(stock_out), str(src / "stocks" / stock)])
-    # Verifica o caminho de halation/grain com sanitizadores dinamicos,
-    # inclusive a rotina upstream que produz -Wstringop-overflow em GCC.
+    original_outputs = {
+        stock: capture_output([str(stock_out), str(src / "stocks" / stock)])
+        for stock in stocks_to_test
+    }
+    # UBSan encontrou shift negativo em jpeg_enc.c:353; testamos o ajuste
+    # so numa copia em build/, sem alterar codigo do motor de referencia.
     if not shutil.which("clang"):
         raise RuntimeError("clang requerido para ASan/UBSan do processamento Soup")
+    compatible_encoder = sanitizer_encoder_copy(src)
     san_out = ROOT / "build" / "soup-stock-sanitized"
     execute([
         "clang", "-std=c11", "-O1", "-g", "-Wall", "-Wextra",
@@ -154,7 +191,7 @@ def main():
         str(ROOT / "src" / "host" / "hal_sim.c"),
         str(ROOT / "src" / "core" / "output.c"),
         str(src / "engine" / "se.c"),
-        str(src / "engine" / "jpeg_enc.c"),
+        str(compatible_encoder),
         str(src / "engine" / "jpeg_dec.c"),
         str(src / "engine" / "stock.c"),
         str(src / "engine" / "look.c"),
@@ -164,8 +201,10 @@ def main():
         "-lm", "-o", str(san_out)
     ])
     for stock in stocks_to_test:
-        execute([str(san_out), str(src / "stocks" / stock)])
-    print("OK: 3 perfis Soup em builds normal + ASan/UBSan.", flush=True)
+        actual = capture_output([str(san_out), str(src / "stocks" / stock)])
+        if actual != original_outputs[stock]:
+            raise RuntimeError(f"output JPEG do stock {stock} divergiu com o patch de UB")
+    print("OK: 3 perfis Soup em builds normal + ASan/UBSan, resultados identicos.", flush=True)
     # CR2 host: header TIFF sintetico contem JPEG feito pelo proprio Soup.
     cr2_out = ROOT / "build" / "soup-cr2-preview"
     cr2_sources = [
