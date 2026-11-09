@@ -137,6 +137,36 @@ def main():
         "-lm", "-o", str(stock_out)
     ])
     execute([str(stock_out), str(src / "stocks" / "soup800.fs")])
+    # CR2 host: header TIFF sintetico contem JPEG feito pelo proprio Soup.
+    cr2_out = ROOT / "build" / "soup-cr2-preview"
+    cr2_sources = [
+        str(src / "engine" / "se.c"),
+        str(src / "engine" / "cr2.c"),
+        str(src / "engine" / "wb.c"),
+        str(src / "engine" / "jpeg_dec.c"),
+        str(src / "engine" / "jpeg_enc.c"),
+    ]
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "tests" / "soup_cr2_preview.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        *cr2_sources, "-lm", "-o", str(cr2_out)
+    ])
+    execute([str(cr2_out)])
+    inspect_out = ROOT / "build" / "rebobina-cr2-inspect"
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "src" / "host" / "cr2_inspect.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        *cr2_sources, "-lm", "-o", str(inspect_out)
+    ])
+    # CLI nao modifica arquivos; um argumento inválido e rejeitado.
+    result = subprocess.run([str(inspect_out)], capture_output=True, text=True)
+    if result.returncode != 2:
+        raise RuntimeError("cr2-inspect nao rejeitou chamada sem arquivo")
+    print("OK: CR2 header sintetico + CLI de inspecao somente leitura.", flush=True)
     print("OK: testes do motor Soup original + smoke de integracao HAL; "
           "SEM integracao no firmware/camera.", flush=True)
 
