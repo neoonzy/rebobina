@@ -157,8 +157,7 @@ static int run(const char *input, const char *stock_path, const char *directory,
         goto done;
     }
     hal_ready = 1;
-    rc = rb_output_begin(&output, &posix.api, name);
-    if (rc != RB_HAL_OK) {
+    if (rb_output_begin(&output, &posix.api, name) != RB_HAL_OK) {
         fputs("Erro: nao foi possivel criar temporario exclusivo (.TMP).\n", stderr);
         goto done;
     }
