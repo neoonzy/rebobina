@@ -89,6 +89,10 @@ build/test-output: tests/test_output.c src/core/output.c src/host/hal_sim.c incl
 	@mkdir -p build
 	$(CC) $(CFLAGS) -o $@ tests/test_output.c src/core/output.c src/host/hal_sim.c
 
+build/test-posix: tests/test_hal_posix.c src/host/hal_posix.c src/core/output.c include/rebobina/hal_posix.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ tests/test_hal_posix.c src/host/hal_posix.c src/core/output.c
+
 build/arm/output.o: src/core/output.c include/rebobina/output.h include/rebobina/hal.h
 	@mkdir -p build/arm
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
@@ -132,13 +136,14 @@ check-modules:
 audit-platform:
 	python3 tools/platform_audit.py check
 
-test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/rebobina-sim-bridge test-plugins
+test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/test-posix build/rebobina-sim-bridge test-plugins
 	./build/test-registry
 	./build/test-ui
 	./build/test-ui-stress
 	./build/test-manager
 	./build/test-hal
 	./build/test-output
+	./build/test-posix
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:
