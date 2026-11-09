@@ -29,7 +29,7 @@ int main(void)
     rb_output out = {0}, conflict = {0};
     rb_hal_file f, stale;
     size_t count = 0;
-    int fd, dir;
+    int dir;
     assert(mkdtemp(root) != NULL);
     assert(rb_posix_hal_init(&h, root) == RB_HAL_OK);
     dir = h.directory_fd;
@@ -93,8 +93,8 @@ int main(void)
     assert(h.api.remove(h.api.ctx, "PHOTO.JPG") == RB_HAL_NOT_FOUND);
     assert(h.api.remove(h.api.ctx, "SAFE.JPG") == RB_HAL_OK);
     assert(unlinkat(h.directory_fd, "LINK.JPG", 0) == 0);
-    assert(rmdir(root) == 0 || 1); /* diretório fd permanece aberto, mas pode ser removido */
     rb_posix_hal_destroy(&h);
+    assert(rmdir(root) == 0);
     assert(unlink(symlink_dir) == 0);
     puts("OK: HAL POSIX isolada, rename exclusivo, sync, symlink recusado e recuperação");
     return 0;
