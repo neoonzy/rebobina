@@ -81,10 +81,13 @@ static uint8_t *load_file(const char *path, size_t max_bytes, size_t *size)
         (void)fclose(fp);
         return NULL;
     }
-    if (fread(bytes, 1, (size_t)n, fp) != (size_t)n ||
-        fclose(fp) != 0) {
-        free(bytes);
-        return NULL;
+    {
+        size_t read_count = fread(bytes, 1, (size_t)n, fp);
+        int close_rc = fclose(fp);
+        if (read_count != (size_t)n || close_rc != 0) {
+            free(bytes);
+            return NULL;
+        }
     }
     bytes[n] = 0;
     *size = (size_t)n;
@@ -154,7 +157,7 @@ static int run(const char *input, const char *stock_path, const char *directory,
         goto done;
     }
     hal_ready = 1;
-    rc = (se_err)rb_output_begin(&output, &posix.api, name);
+    rc = rb_output_begin(&output, &posix.api, name);
     if (rc != RB_HAL_OK) {
         fputs("Erro: nao foi possivel criar temporario exclusivo (.TMP).\n", stderr);
         goto done;
