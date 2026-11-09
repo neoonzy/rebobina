@@ -1,6 +1,6 @@
 # Preparação da adaptação do Soup Engine ao Rebobina
 
-**Sprint 6 — motor original e perfil Soup 800 aplicados a pixels sintéticos no host, com saída JPEG em duas fases; CR2 e câmera permanecem pendentes.**
+**Sprint 6 — Soup 800/Portra/Acros testados em pixels sintéticos; preview JPEG extraído de envelope CR2 artificial; imagens CR2 reais e câmera permanecem pendentes.**
 
 Fonte pinada para análise: [`jiijii0/soup-engine@6422c86b...`](https://github.com/jiijii0/soup-engine/tree/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src). A integração existente na 5D utiliza hooks da versão de 2012 do Magic Lantern e não pode ser transferida automaticamente para o Rebobina.
 
@@ -12,9 +12,11 @@ A rotina `tools/soup_host.py` obtém o commit GPLv2 `6422c86b4530a5bdb4c5619f528
 
 **Perfil de filme no host:** agora `tests/soup_stock_output.c` lê o arquivo original `stocks/soup800.fs`, usa o parser, o look com halation e o codificador JPEG do Soup e grava um JPEG sintético pelo fluxo `rb_output` em duas fases do Rebobina. No teste Linux passaram 8×8 pixels, **183 componentes RGB modificados** e JPEG de **1.006 bytes**. [CI](https://github.com/neoonzy/rebobina/actions/runs/42237005969). É a primeira aplicação de um stock real no protótipo host, mas **não há abertura de arquivo CR2 nem fotografia do usuário**.
 
-**Alerta de compilação:** GCC 15 emite `-Wstringop-overflow` no código upstream de borda de halation (`engine/look.c`). O teste deixa esse aviso visível e não modifica `engine/`; é uma pendência de revisão e não pode ser tomada como prova de segurança de memória.
+**Validação com sanitizadores:** [CI](https://github.com/neoonzy/rebobina/actions/runs/42550242368) executou Soup 800, Portra e Acros com Clang ASan/UBSan e comparou **os três JPEGs completos byte a byte** com a compilação original em fixtures sintéticas. O sanitizador encontrou UB real em deslocamentos de valores negativos no encoder `jpeg_enc.c`: para continuar testando, o runner produz uma cópia **somente em `build/soup-sanitizer-compat/`** com duas substituições de shift por multiplicação. **O upstream permanece intacto**. O aviso GCC `-Wstringop-overflow` em `engine/look.c` continua pendente. [Relatório detalhado](SOUP-SANITIZERS.md).
 
 O Soup possui uma pequena dependência macOS no utilitário `host/main.c` (campos de `statfs`). Nosso script aplica um **shim apenas na cópia temporária baixada em `build/soup-upstream/`**, sem alterar nenhum arquivo de `engine/`, nem o projeto original remoto.
+
+**Entrada CR2 sintética:** `tests/soup_cr2_preview.c` exercita o parser real do Soup com um envelope TIFF/CR2 artificial contendo JPEG, validado por `rb_cr2_host_find_preview`. O runner usa também `out/previewcheck` para aplicar Soup 800 ao preview e gerar JPEG em diretório temporário, preservando o arquivo original. [Leia o procedimento](CR2-INSPECAO-HOST.md). **Não contém RAW Canon real.**
 
 No mesmo workflow, `tests/soup_hal_smoke.c` compila as implementações reais de `se_arena` e `se_rd` (de `engine/se.c`) junto ao mock HAL Rebobina, alimentados por **oito bytes sintéticos de fixture** e testados com leitura curta e limite de arena. Esse teste não é um processamento de imagem, não gera JPEG e não prova que o Soup foi integrado ao menu ou à câmera.
 
@@ -58,8 +60,11 @@ A cópia de código Soup é temporária e obedece à GPLv2; **nenhum binário ne
 - [x] Executar selftests do motor upstream e smoke de `se_arena`/`se_rd` com HAL Rebobina.
 - [x] Codificar um JPEG sintético pelo Soup com saída na HAL e testar falha de gravação.
 - [x] Aplicar stock real `soup800.fs` a pixels sintéticos e gerar JPEG pelo fluxo em duas fases ([CI](https://github.com/neoonzy/rebobina/actions/runs/42237005969)).
-- [ ] Revisar aviso GCC na borda de halation; executar sanitizadores adicionais na integração do look.
-- [ ] Comparar saída JPEG/RAW do futuro adaptador Rebobina byte a byte com o processamento de referência.
+- [x] Executar ASan + UBSan em três stocks sintéticos e comparar saídas JPEG completas.
+- [x] Identificar UB do deslocamento negativo no encoder e testar ajuste numa cópia temporária.
+- [ ] Investigar o aviso GCC da borda de halation em `engine/look.c` com entradas maiores.
+- [x] Comparar saída JPEG sintética de três stocks normais e sanitizados byte a byte.
+- [ ] Comparar saída JPEG/RAW de **fotos reais** do futuro adaptador Rebobina com o processamento de referência.
 - [ ] Implementar módulo Soup no contrato `rb_module` ou numa ABI revista, após testes.
 - [ ] Validar tela, eventos e arquivos na 5D física **1.1.1** após o primeiro boot.
 

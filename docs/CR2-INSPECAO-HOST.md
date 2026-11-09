@@ -36,14 +36,16 @@ Um resultado positivo significa apenas que a estrutura do *preview* é coerente 
 
 O teste usa `se_cr2_find_preview` do upstream através do wrapper e compara duas decodificações do mesmo JPEG: uma recuperada do envelope e outra direta. Também injeta cabeçalho errado, compressão diferente de JPEG, strip truncado, declarações de tamanho maiores que o arquivo, assinaturas falsas e dimensões incoerentes.
 
-`tools/soup_host.py` compila esse teste no CI e verifica que o CLI de inspeção rejeita argumentos ausentes. A última comparação com uma fotografia CR2 real continua **pendente até existir uma amostra autorizada**.
+O runner `tools/soup_host.py` também grava essa fixture em **diretório temporário exclusivo**, executa o inspector e a ferramenta de referência original `out/previewcheck` do Soup com o perfil `soup800.fs`. O teste verificou um **JPEG de 926 bytes**, confirmou os marcadores SOI/EOI e comparou o SHA-256 do envelope antes/depois: entrada intacta. [CI](https://github.com/neoonzy/rebobina/actions/runs/42550242368). O CLI de inspeção rejeita chamadas sem argumento.
+
+Isso comprova o fluxo de **pré-visualização de um container sintético**; a última comparação com uma fotografia CR2 real continua **pendente até existir uma amostra autorizada**.
 
 ## Próximos passos
 
 1. Validar cabeçalho, offset e tamanho em um **CR2 real da 5D Classic**, lido e preservado sem alterações.
-2. Executar `se_jpeg_decode_scaled` no preview completo de uma cópia e testar uma entrada truncada.
+2. Executar `se_jpeg_decode_scaled` no preview completo de um **CR2 real autorizado** e testar uma entrada truncada (a decodificação de fixture sintética já foi testada).
 3. Conectar a saída JPEG do Soup e os arquivos de filme `.fs` ao adaptador de publicação em duas fases (`rb_output`) num protótipo que trabalhe com fotos reais **somente no computador**, sem sobrescrever originais.
-4. Testar perfis e truncamento sob ASan/UBSan, observando o aviso ainda pendente de halation em `engine/look.c`.
+4. Ampliar testes ASan/UBSan para arquivos maiores/CR2 reais e revisar o aviso ainda pendente de halation em `engine/look.c` ([evidências](SOUP-SANITIZERS.md)).
 5. **Só depois**, adaptar esse caminho para os serviços reais de arquivos Canon/VxWorks, testados na 5D com firmware 1.1.1.
 
 Referências: [Soup Engine host](SOUP-ADAPTACAO.md), [saída em duas fases](SAIDA-SEGURA.md) e [roteiro sem CF](SPRINT-SEM-CF.md).
