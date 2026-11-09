@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
+#include <linux/fs.h>
 #include <unistd.h>
 
 /* Somente basenames ASCII curtos. Nenhum caminho relativo, separador ou symlink. */
@@ -119,7 +121,7 @@ static rb_hal_result rename_exclusive(void *arg, const char *from, const char *t
     if (!p || !filename_ok(from) || !filename_ok(to)) return RB_HAL_BAD_ARG;
     if (p->active_fd >= 0 || p->directory_fd < 0) return RB_HAL_BAD_STATE;
     /* Linux renameat2: RENAME_NOREPLACE, sem fallback que possa sobrescrever. */
-    if (renameat2(p->directory_fd, from, p->directory_fd, to,
+    if (syscall(SYS_renameat2, p->directory_fd, from, p->directory_fd, to,
                   RENAME_NOREPLACE) != 0) return errcode(errno);
     /* Se fsync do diretorio falhar apos rename, final pode ja existir. */
     if (fsync(p->directory_fd) != 0) return RB_HAL_IO;
