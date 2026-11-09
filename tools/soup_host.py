@@ -248,6 +248,26 @@ def main():
         str(src / "engine" / "lut.c"),
         "-lm", "-o", str(develop_out)
     ])
+    develop_san_out = ROOT / "build" / "rebobina-cr2-develop-sanitized"
+    sanitized_cr2_sources = [
+        str(compatible_encoder) if path.endswith("/jpeg_enc.c") else path
+        for path in cr2_sources
+    ]
+    execute([
+        "clang", "-std=c11", "-O1", "-g", "-Wall", "-Wextra",
+        "-fsanitize=address,undefined", "-fno-sanitize-recover=all",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "src" / "host" / "cr2_develop.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        str(ROOT / "src" / "host" / "hal_posix.c"),
+        str(ROOT / "src" / "core" / "output.c"),
+        *sanitized_cr2_sources,
+        str(src / "engine" / "stock.c"),
+        str(src / "engine" / "look.c"),
+        str(src / "engine" / "grade.c"),
+        str(src / "engine" / "lut.c"),
+        "-lm", "-o", str(develop_san_out)
+    ])
     # CLI nao modifica arquivos; um argumento inválido e rejeitado.
     result = subprocess.run([str(inspect_out)], capture_output=True, text=True)
     if result.returncode != 2:
@@ -284,6 +304,14 @@ def main():
         dst = target_dir / "REBOBINA.JPG"
         if dst.read_bytes() != jpeg:
             raise RuntimeError("JPEG Rebobina diferente do previewcheck byte a byte")
+        # ASan/UBSan do pipeline inteiro, usando a correção de UB apenas
+        # na cópia do encoder, sem tocar no upstream ou no build normal.
+        execute([
+            str(develop_san_out), str(sample), str(stock_path),
+            str(target_dir), "SANITIZED.JPG", "1"
+        ])
+        if (target_dir / "SANITIZED.JPG").read_bytes() != jpeg:
+            raise RuntimeError("CLI completa sob ASan/UBSan divergiu da referencia")
         if (target_dir / "REBOBINA.JPG.TMP").exists():
             raise RuntimeError("temporario nao foi limpo apos sucesso")
         if hashlib.sha256(sample.read_bytes()).hexdigest() != original_sha:
