@@ -1,191 +1,222 @@
 # Rebobina
 
-**Um novo software embarcado, livre e modular para expandir as possibilidades de câmeras digitais clássicas.**
+**English** · [Português (Brasil)](README.pt-BR.md)
 
-O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a partir do conhecimento, dos mecanismos e, quando viável e legalmente compatível, de componentes de código aberto do [Magic Lantern](https://magiclantern.fm). O foco inicial é a **Canon EOS 5D Classic (firmware 1.1.1)**. O objetivo é oferecer uma alternativa modular ao Magic Lantern para esse modelo: interface própria, recursos fotográficos próprios e um sistema que permita adicionar extensões como o [Soup Engine](https://github.com/neoonzy/soup-engine) sem reescrever o executável principal a cada módulo.
+**An open-source, modular software project exploring new possibilities for classic digital cameras.**
 
-**O produto principal não é um instalador do Magic Lantern nem um gerenciador de plugins para o Magic Lantern existente.** O Rebobina pretende executar no lugar da extensão Magic Lantern no cartão, preservando o firmware Canon na ROM. Um eventual instalador será somente uma ferramenta auxiliar. A decisão sobre quais partes do Magic Lantern serão reutilizadas ou adaptadas depende da pesquisa da implementação para 5D Classic.
+Rebobina aims to become an independent, extensible **on-camera program**. It draws on knowledge and, where technically and legally suitable, open-source components from [Magic Lantern](https://magiclantern.fm). Our initial target is the **original Canon EOS 5D (2005), firmware 1.1.1**, commonly called the *5D Classic*—**not** the 5D Mark II, III, or IV.
+
+The long-term goal is to provide our own camera interface, photographic tools, and a versioned module system so that features such as [Soup Engine](https://github.com/jiijii0/soup-engine) can eventually be added or updated independently of the main program.
+
+Rebobina is **not** a Magic Lantern installer or a plugin manager for an existing Magic Lantern installation. The intended program would launch from a prepared CompactFlash card alongside Canon's running firmware, without replacing the firmware stored in ROM. An optional installation assistant could come later.
 
 > [!IMPORTANT]
-> **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
+> **Experimental project — not ready for use on a camera.**
+>
+> Rebobina currently runs **only in development environments on a computer**. It has **not booted on a Canon EOS 5D Classic**. There is no validated on-camera interface, ARM module loader, or installable release. Do **not** copy host executables, experimental files, or ARM object files to your CompactFlash card. Passing host tests does **not** demonstrate hardware safety.
 
-## Desenvolvimento de JPEG a partir de CR2 — ferramenta Linux
+## Current status
 
-O Rebobina agora tem um **desenvolvedor de preview JPEG de CR2 no computador**, conectado ao motor real do Soup Engine: abre um CR2 somente para leitura, identifica o preview JPEG, aplica um perfil `.fs` e cria um **novo JPEG**, sem sobrescrever fotos existentes. A saída utiliza `rb_output` e uma HAL específica para Linux (`openat`, `fsync`, `renameat2(RENAME_NOREPLACE)`). **Não processa diretamente o RAW Bayer e não é software para instalar na Canon.**
+The following components work **on the host computer**:
 
-```sh
-python3 tools/soup_host.py --fetch
-mkdir -p ./rebobina-saidas
-./build/rebobina-cr2-develop /caminho/foto.CR2 \
-  ./build/soup-upstream/Canon-EOS-5D/src/stocks/portra.fs \
-  ./rebobina-saidas FOTO-PORTRA.JPG 2
-```
+- **Portable C core:** experimental module registry, versioned module API, lifecycle manager, and a Hello example module.
+- **Interface simulators:** terminal navigation and a responsive browser interface driven by the portable C core.
+- **Module experiments:** JSON manifest validation and loading of trusted Linux `.so` plugins; **not** camera modules.
+- **Hardware abstraction:** a deterministic in-memory HAL for files, tasks, and memory allocation, with injected failures, partial writes, and simulated power cycles.
+- **Protected output:** temporary-file staging, synchronization, and exclusive publication without overwriting an existing destination. A separate **Linux-only** backend supports actual host files.
+- **Soup Engine integration tests:** a pinned upstream source revision with 13 self-tests, synthetic JPEG/film-look processing, and sanitizer checks.
+- **CR2 preview tools:** read-only inspection and a Linux utility that applies Soup Engine film profiles to the **embedded JPEG preview** in a CR2, producing a separate JPEG.
+- **ARM946E-S toolchain checks:** relocatable ARM object files are built and validated. **They are not executable camera firmware.**
+- **Automated testing:** C and Python tests, GitHub Actions, and host-side sanitizer builds.
 
-Na CI, o Rebobina produziu um JPEG **idêntico byte a byte** ao `previewcheck` do Soup Engine, usando um envelope CR2 **sintético**, e rejeitou colisão de saída, truncamento e caminhos inseguros. **Ainda não há uma amostra CR2 real validada.** Leia [guia da CLI e limitações](docs/CR2-DESENVOLVIMENTO-HOST.md) e [ADR 0006](docs/decisions/0006-hal-posix-segura.md).
+**Not yet implemented on the camera:** a working Rebobina boot, physical LCD/buttons, a camera-side plugin loader, a validated FAT filesystem backend, or RAW sensor processing as an on-camera module.
 
-## Inspeção de CR2 e testes de sanitizadores (host)
+The automated CR2 integration tests use a **synthetic TIFF/CR2-like envelope**, not a real Canon photograph. The CR2 developer processes the **embedded JPEG preview, not Bayer RAW sensor data**. Real EOS 5D CR2 compatibility is not yet validated.
 
-O Rebobina agora tem um **inspector de previews JPEG embutidos em CR2**, somente leitura, que verifica offsets, limites do arquivo e dimensões com o parser original do Soup Engine. A CI extrai um JPEG de um **envelope CR2 sintético, sem RAW Canon real**, aplica o perfil Soup 800 com a ferramenta de referência e gera outro JPEG, sem alterar a entrada.
+## Quick start (host development)
 
-```sh
-python3 tools/soup_host.py --fetch
-./build/rebobina-cr2-inspect /caminho/para/foto.CR2
-```
+For the basic tools you need a **C11 compiler, Make, and Python 3.9+**. These commands do **not** communicate with a camera.
 
-O primeiro comando requer Linux, Git, Make, C/Clang, Python e rede. O segundo apenas inspeciona metadados do preview num arquivo de até 64 MiB e **não modifica o CR2**. Nenhum CR2 real da sua câmera foi testado. Leia [inspeção do CR2](docs/CR2-INSPECAO-HOST.md), [ADR 0005](docs/decisions/0005-cr2-preview-validacao.md) e [verificação de memória Soup](docs/SOUP-SANITIZERS.md).
-
-Em testes com ASan/UBSan, encontramos um **deslocamento negativo indefinido** no encoder JPEG original do Soup. Uma correção experimental restrita a uma cópia temporária permite testar **Soup 800, Portra e Acros** e comparar seus JPEGs completos byte a byte com a saída original. Isso não corrige o upstream nem valida segurança na Canon.
-
-## Saída protegida e primeiro perfil real de filme (host)
-
-O Rebobina agora testa a publicação de JPEG em **duas fases**: arquivo temporário `.TMP`, sincronização simulada, fechamento e renomeação **sem substituir arquivo existente**. O código tem recuperação explícita de temporários após interrupção, porém **não há garantia de atomicidade no CompactFlash real**.
-
-Uma integração host aplica o arquivo original `stocks/soup800.fs` através do motor Soup Engine a **pixels RGB sintéticos 8×8**, gerando um JPEG pelo codificador original e salvando-o nessa HAL em RAM. O teste alterou 183 componentes de cor e gerou um JPEG de 1.006 bytes. Não são fotos reais nem um CR2 da câmera.
-
-Veja [saída segura: contrato e limites](docs/SAIDA-SEGURA.md) e [ADR 0004: publicação exclusiva](docs/decisions/0004-publicacao-exclusiva.md).
-
-## HAL simulada e processamento de referência do Soup Engine
-
-O Rebobina possui um **contrato C** de arquivos, memória e fila de tarefas e um mock **inteiramente em RAM**. Ele permite injetar falhas, leituras curtas, gravações parcialmente interrompidas e simular reinicialização **sem escrever no cartão CF**.
-
-```sh
-make hal-demo
-make test
-```
-
-O motor original do Soup Engine para a 5D também pode ser compilado e testado **separadamente** no computador, numa revisão GPLv2 fixada. O fluxo baixa o upstream em `build/soup-upstream/`, aplica um shim de compatibilidade Linux ao utilitário desktop dentro da cópia temporária e prepara uma **cópia separada apenas para testes sanitizados** do codificador JPEG, roda seus 13 selftests e compila um teste de ligação entre `se_arena/se_rd` e a HAL Rebobina:
-
-```sh
-python3 tools/soup_host.py --fetch
-```
-
-Esse comando requer Git, compilador C, Make, Python e **acesso à internet**. Os testes incluem a **geração de um JPEG sintético de 8×8 pixels** pelo codificador real do Soup Engine, gravado somente na HAL em RAM, com teste de gravação interrompida e preservação de um arquivo fictício. Não importa o motor para o firmware Rebobina nem processa fotografias reais do usuário. Consulte [HAL SIMULADA](docs/HAL-SIMULADA.md), [Soup Engine no host](docs/SOUP-ADAPTACAO.md), [saída segura](docs/SAIDA-SEGURA.md) e [ADR 0003](docs/decisions/0003-hal-deterministica.md).
-
-## Simulador visual — desenvolvimento sem leitor CF
-
-O projeto agora oferece um **laboratório visual no navegador**. A interface é responsiva e suas ações são calculadas por `src/core/ui.c` e `src/core/manager.c`, executados no computador.
-
-```sh
-make web-sim
-```
-
-Abra **http://127.0.0.1:8765/** no navegador do **mesmo computador**. Pressione a lixeira para abrir o menu, use ↑/↓ e SET; em **Módulos**, SET ativa/desativa o Hello **somente no host**. É possível reiniciar a simulação a qualquer momento. Não precisa de câmera, leitor CF, arquivo `.FIR` ou Magic Lantern.
-
-Leia o [manual do simulador visual](docs/SIMULADOR-VISUAL.md) e o [plano de desenvolvimento sem CF](docs/SPRINT-SEM-CF.md). **O simulador não emula o processador, o sistema VxWorks nem o LCD físico.**
-
-## O que queremos construir
-
-- **Programa embarcado completo:** inicialização a partir do CompactFlash, ciclo de vida de tarefas, interface própria e ferramentas fotográficas integradas ao firmware Canon em execução.
-- **Núcleo modular:** carregamento, ativação e desativação de recursos por uma API versionada, com gerenciamento de memória e erros.
-- **Sistema de extensões:** recursos como Soup Engine instaláveis e atualizáveis sem aplicar patches individuais no executável principal (meta futura, ainda não implementada).
-- **Camada por câmera:** abstração de serviços específicos do hardware, começando pela Canon 5D Classic.
-- **Ferramentas de desenvolvimento:** simulador, testes e validação automatizada para reduzir os riscos de usar código novo no equipamento.
-- **Instalação assistida (secundária):** um utilitário para facilitar a preparação e recuperação do cartão quando existir uma versão embarcada validada.
-
-O Magic Lantern já possui um sistema de módulos em várias versões. O Rebobina vai estudar e reutilizar esse legado quando fizer sentido, mantendo atribuição e GPLv2, mas terá **produto, interface, organização e evolução próprios**. Não é necessário reescrever do zero o que já foi resolvido pela comunidade.
-
-## O que já funciona nesta versão inicial
-
-- Um **protótipo do registro de módulos em C**, executado no computador;
-- Um **simulador de interface em terminal** e um **simulador visual no navegador**, ambos conectados ao núcleo C;
-- Um **gerenciador host de módulos** para ativar, desativar e testar falhas de módulos individualmente;
-- Uma **HAL simulada C** para arquivos, tarefas e memória, com falhas injetáveis;
-- Execução em CI dos **13 selftests do Soup Engine original**, sem incorporação ao firmware;
-- Objetos relocáveis para **ARM946E-S**, sem firmware instalável;
-- Uma **prova de módulos externos `.so` no Linux host**, sem suporte a câmera;
-- Contrato inicial de API com verificação de versão, identificador e ciclo de vida;
-- Exemplo `hello`, que demonstra inicialização e encerramento de módulo;
-- Manifestos JSON validados por ferramenta Python, incluindo um *placeholder* do Soup Engine;
-- Testes do registro e dos manifestos, com CI no GitHub Actions.
-
-**Ainda não existe um executável embarcado do Rebobina:** não há inicialização própria na câmera, menu na câmera, carregador ARM de módulos, suporte a `.mo`, isolamento, instalação ou integração funcional com o Soup Engine. Há apenas carregamento experimental de `.so` no **Linux host**. Os manifestos descrevem intenções e compatibilidade planejada, não permissões efetivamente impostas.
-
-## Estrutura
-
-```text
-include/rebobina/     Contrato inicial de módulos em C
-src/core/             Registro, UI portável e gerenciador de módulos (host)
-src/host/             Demos, simulador CLI e ponte C do simulador visual
-modules/hello/        Módulo de exemplo executável no host
-modules/soup-engine/  Manifesto de integração planejada
-simulator/web/        UI visual local (HTML/CSS/JS, sem dependências remotas)
-tools/simulator_server.py  Servidor HTTP somente localhost + ponte para C
-tools/modules.py      Validação e criação de manifestos
-tests/                Testes automatizados
-docs/                 Arquitetura, segurança e roteiro
-```
-
-## Desenvolvimento atual e próximo marco
-
-A Sprint 0 foi concluída como fundação host e a Sprint 2 agora inclui o laboratório visual e o gerenciador de módulos host. A Sprint 1 permanece aberta por dependências históricas: já existe um mapa preliminar dos hooks, da ROM e da memória da EOS 5D Classic, mas o executável Magic Lantern 2012 de referência continua sem hash verificado. O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. Sem leitor CF e com a câmera ainda em firmware 1.1.0, o próximo passo é construir uma HAL simulada e integrar progressivamente o motor de processamento do Soup Engine, mantendo o primeiro boot físico bloqueado até a atualização e a validação da câmera 1.1.1. Um instalador desktop não é requisito para iniciar essa etapa.
-
-## Primeiros comandos
-
-Requisitos: compilador C11, `make` e Python 3.9 ou superior. Os comandos **não acessam a câmera**.
-
-```sh
-make demo          # compila e executa o protótipo C no computador
-make hal-demo      # demonstra a HAL com dados somente em RAM
-make test          # testa o registro C e a ferramenta Python
-make check-modules # valida manifestos
-make audit-platform # verifica consistência do inventário estático da 5D
-make arm-objects    # compila objetos ARM (NÃO firmware)
-make sim-ui         # simula navegação no terminal
-make web-sim        # inicia interface visual em http://127.0.0.1:8765/
-make plugin-demo    # carrega um .so confiável no Linux host
+~~~sh
+make demo             # build and run the C host prototype
+make hal-demo         # demonstrate the in-memory HAL
+make test             # run C/Python tests, including HAL tests
+make check-modules    # validate JSON module manifests
+make audit-platform   # check the static EOS 5D platform inventory
+make arm-objects      # build ARM objects (NOT installable firmware)
+make sim-ui           # simulate the interface in a terminal
+make web-sim          # start the visual simulator on localhost:8765
+make plugin-demo      # load a trusted Linux .so plugin
 python3 tools/modules.py list
-python3 tools/modules.py new minha-extensao --name "Minha extensão"
-```
+python3 tools/modules.py new my-extension --name "My extension"
+~~~
 
-O último comando cria um manifesto e um README de rascunho para uma nova extensão; **não cria um binário de câmera**.
+The last command creates a draft extension manifest and README, **not** a camera binary.
 
-## Primeiro dispositivo
+### Visual simulator
 
-| Campo | Alvo inicial |
+~~~sh
+make web-sim
+~~~
+
+Open **http://127.0.0.1:8765/** in a browser on **the same computer**. Use the trash-can button to open the menu, ↑/↓ to navigate, and SET to select. In **Modules**, SET toggles the Hello example **in the host simulation only**.
+
+You do not need a camera, CompactFlash reader, `.FIR` file, or Magic Lantern installation. The simulator does **not** emulate the DIGIC II processor, VxWorks, or the physical LCD.
+
+Read the [visual simulator guide](docs/SIMULADOR-VISUAL.md) and the [development plan without a CF reader](docs/SPRINT-SEM-CF.md) (currently in Portuguese).
+
+## Develop a CR2 JPEG preview on Linux
+
+The host utility `rebobina-cr2-develop` follows this pipeline:
+
+1. Open an input CR2 **read-only**, with a 64 MiB size limit.
+2. Locate and bounds-check its embedded JPEG preview using Soup Engine's parser.
+3. Decode the preview, apply a `.fs` film stock, and encode a **new JPEG**.
+4. Publish the result in an explicitly selected output directory using Rebobina's output API and a Linux backend with `openat`, `fsync`, and `renameat2(RENAME_NOREPLACE)`.
+
+Building the Soup tools additionally requires **Linux, Git, Make, a C compiler, Clang, Python, and internet access**. The script fetches a **pinned GPLv2 upstream source revision** into the temporary `build/` directory, applies host-only compatibility adjustments, and runs tests. It does not download or install Canon firmware.
+
+~~~sh
+python3 tools/soup_host.py --fetch
+
+mkdir -p ./rebobina-output
+./build/rebobina-cr2-develop \
+  /path/to/photo.CR2 \
+  ./build/soup-upstream/Canon-EOS-5D/src/stocks/portra.fs \
+  ./rebobina-output \
+  PHOTO-PORTRA.JPG \
+  2
+~~~
+
+The optional final argument is the output scale: **1** for the embedded preview's original dimensions, or **2** for half its width and height (default). Output names must be safe, short ASCII basenames without directories. **An existing JPEG is never overwritten.** Use a dedicated output directory.
+
+In CI, Rebobina produced a JPEG **byte-for-byte identical** to Soup Engine's reference `previewcheck` program on the **same synthetic CR2-like input** and Soup 800 profile. Tests also reject collisions, truncated input, symbolic-link output directories, and path traversal, while preserving the source. **No real EOS 5D Classic CR2 has been validated yet.**
+
+See the [host CR2 developer guide](docs/CR2-DESENVOLVIMENTO-HOST.md), [protected output protocol](docs/SAIDA-SEGURA.md), and [Linux output backend decision](docs/decisions/0006-hal-posix-segura.md) (Portuguese).
+
+### Inspect an embedded preview without modifying the CR2
+
+~~~sh
+./build/rebobina-cr2-inspect /path/to/photo.CR2
+~~~
+
+The read-only inspector reports the preview's dimensions, offset, and size, when valid. Success does **not** prove the CR2's authenticity, the integrity of its RAW data, or that the full image is safe to decode. See the [CR2 inspection notes](docs/CR2-INSPECAO-HOST.md).
+
+## Soup Engine tests and known issues
+
+~~~sh
+python3 tools/soup_host.py --fetch
+~~~
+
+The host test runner compiles and tests a pinned version of the **original Soup Engine** independently, without incorporating it into an on-camera Rebobina module. Current coverage includes:
+
+- The 13 upstream self-tests.
+- Synthetic 8×8 image processing with **Soup 800, Portra, and Acros** film stocks.
+- Byte-for-byte comparison of complete synthetic JPEG files.
+- A synthetic CR2-like envelope containing a real JPEG and tests for corrupt or truncated inputs.
+- Fault-injected writes, exclusive output publication, and source-file preservation.
+- AddressSanitizer and UndefinedBehaviorSanitizer builds.
+
+Sanitizer testing identified **undefined behavior in upstream JPEG encoding** (left-shifting negative numbers). An experimental test-only copy changes two such expressions to multiplication to extend sanitizer coverage. **The upstream code is not modified or silently integrated into camera firmware.** A separate compiler warning in film-look halation remains under investigation.
+
+Read the [Soup Engine porting notes](docs/SOUP-ADAPTACAO.md) and [sanitizer findings](docs/SOUP-SANITIZERS.md) (Portuguese). These host results do **not** establish on-camera safety.
+
+## What we want to build
+
+- **Independent on-camera runtime:** controlled startup from CompactFlash, task management, native UI, and photographic tools running alongside Canon's original firmware.
+- **Modular core:** an API for registering, enabling, disabling, and eventually loading individual modules safely.
+- **Extension system:** add-ons such as Soup Engine that can be installed and updated without individually patching the main executable. **Future goal; not implemented on-camera.**
+- **Camera-specific backends:** isolate hardware services, starting with the original EOS 5D.
+- **Development tooling:** simulation, testing, reproducible builds, and failure injection to reduce risk.
+- **Optional assisted installation:** only after on-camera support and recovery procedures have been validated.
+
+We intend to learn from and properly credit Magic Lantern's existing module system instead of needlessly reinventing it. Rebobina will still have its **own identity, interface, architecture, and development roadmap**.
+
+### Repository structure
+
+~~~text
+include/rebobina/       Experimental C APIs for modules, HAL, and output
+src/core/               Portable module registry, UI, and output logic
+src/host/               Linux demos, simulators, CR2 tools, and HAL backends
+camera/5DC.111/         Camera research and experimental ARM stubs
+modules/hello/          Example host module
+modules/soup-engine/    Planned Soup integration manifest
+simulator/web/          Local browser interface (HTML/CSS/JavaScript)
+tools/                  Simulator server, manifest tools, Soup test runner
+tests/                  Automated host tests and synthetic fixtures
+docs/                   Architecture, safety, roadmap, and research notes
+~~~
+
+### Current milestones
+
+- **Sprint 0 — Foundation:** complete for the host prototype.
+- **Sprint 1 — Reverse engineering:** ongoing; the exact historical Magic Lantern bootstrap binary/source and reference hashes for the EOS 5D Classic still need verification.
+- **Sprint 2 — Toolchain and simulation:** host simulators, HAL mocks, and relocatable ARM objects. No camera executable.
+- **Sprints 4–7 — Early host proofs:** interface, module lifecycle, Soup Engine JPEG preview development, and reliability testing. Hardware acceptance criteria remain open.
+- **Sprint 3 — First controlled camera boot:** **not yet tested or validated**.
+
+The physical test camera was last reported to run **Canon firmware 1.1.0**, while the experimental target is **1.1.1**. A CF reader, verified firmware-update provenance, a validated bootstrap, and a recovery plan are needed before a physical boot test. The host processing pipeline also needs a much smaller memory footprint and a verified VxWorks/FAT backend before any camera-side port.
+
+## Initial target hardware
+
+| Property | Target |
 | --- | --- |
-| Câmera | Canon EOS 5D Classic (2005), não Mark II/III/IV |
-| Firmware Canon | 1.1.1 |
-| Sistema embarcado | VxWorks / DIGIC II |
-| Referência de integração | Magic Lantern específico da EOS 5D Classic |
-| Primeiro módulo planejado | Soup Engine |
+| Camera | Canon EOS **5D Classic (2005)**; **not** Mark II/III/IV |
+| Canon firmware | **1.1.1** |
+| Platform | VxWorks / DIGIC II |
+| Historical reference | Magic Lantern support for the original EOS 5D |
+| Planned first camera module | Soup Engine |
+| Current camera support | **None; host prototype only** |
 
-Não há promessa de compatibilidade com outros modelos. Cada adaptação futura precisará de pesquisa, validação e testes próprios.
+No compatibility with other camera models is promised. Every new port will require separate research and physical validation.
 
-## Documentação
+## Documentation
 
-- [Arquitetura proposta](docs/ARQUITETURA.md)
-- [HAL simulada: contrato, falhas e testes](docs/HAL-SIMULADA.md)
-- [JPEG em duas fases e recuperação de temporários](docs/SAIDA-SEGURA.md)
-- [Inspeção defensiva de CR2 e JPEG embutido](docs/CR2-INSPECAO-HOST.md)
-- [Desenvolvedor de preview CR2 com Soup Engine no Linux](docs/CR2-DESENVOLVIMENTO-HOST.md)
-- [ADR 0006: backend Linux com publicação exclusiva](docs/decisions/0006-hal-posix-segura.md)
-- [Testes de sanitizador e ajuste experimental do Soup](docs/SOUP-SANITIZERS.md)
-- [ADR 0005: validação de offsets CR2](docs/decisions/0005-cr2-preview-validacao.md)
-- [ADR 0004: publicação sem sobrescrita](docs/decisions/0004-publicacao-exclusiva.md)
-- [ADR 0003: HAL determinística e tratamento de falhas](docs/decisions/0003-hal-deterministica.md)
-- [Simulador visual: usar, arquitetura e testes](docs/SIMULADOR-VISUAL.md)
-- [Plano de continuidade sem leitor CF](docs/SPRINT-SEM-CF.md)
-- [ADR 0002: interface web conectada ao core C](docs/decisions/0002-simulador-host.md)
-- [Preparação da adaptação do Soup Engine](docs/SOUP-ADAPTACAO.md)
-- [Sprint 1: levantamento da Canon 5D Classic](docs/5DC-PLATAFORMA.md)
-- [Sprint 2: compilação ARM e interface host](docs/SPRINT2-BASE.md)
-- [Sprint 3: condições para primeiro boot](docs/SPRINT3-CHECKLIST.md)
-- [Sprint 5: protótipo de módulos no Linux host](docs/SPRINT5-PROTOTIPO.md)
-- [Sprint 6: plano de integração Soup Engine](docs/SPRINT6-SOUP-PORT.md)
-- [Sprint 7: testes de estabilidade](docs/SPRINT7-TESTES.md)
-- [Relatório de avanço nas sprints 2, 5 e 7](docs/RELATORIO-AVANCO.md)
-- [Sprint 8: distribuição futura](docs/SPRINT8-DISTRIBUICAO.md)
-- [Sprint 1: relatório de testes](docs/SPRINT1-TESTES.md)
-- [Sprint 1: evidências e fontes](docs/REFERENCIAS-SPRINT1.md)
-- [Contrato e criação de módulos](docs/MODULOS.md)
-- [Segurança, boot e limites](docs/SEGURANCA.md)
-- [Sprints e critérios de entrega](docs/SPRINTS.md)
-- [Roadmap de alto nível](docs/ROADMAP.md)
-- [Como contribuir](CONTRIBUTING.md)
-- [Orientações para agentes e colaboradores](AGENTS.md)
+**Language note:** the detailed technical documents linked below are **currently in Brazilian Portuguese**. This English README is the international starting point. Documentation translations and improvements are welcome.
 
-## Créditos e licença
+### Architecture and contributing
 
-O Rebobina não é afiliado à Canon nem à equipe Magic Lantern. Reconhecemos o trabalho da comunidade do [Magic Lantern](https://github.com/reticulatedpines/magiclantern_simplified) e dos autores do [Soup Engine](https://github.com/jiijii0/soup-engine). **O simulador, a HAL e o gerenciador host são implementações originais do Rebobina; o código do Soup Engine é baixado em uma cópia temporária externa para executar testes do upstream fixado. Nenhum código Soup foi incluído no firmware Rebobina.** A pesquisa de integração utiliza referências externas e mantém as obrigações GPLv2. Integrações futuras deverão respeitar direitos autorais, atribuições e licenças dos componentes reutilizados.
+- [Proposed architecture](docs/ARQUITETURA.md)
+- [Safety, boot, and current limitations](docs/SEGURANCA.md)
+- [High-level roadmap](docs/ROADMAP.md)
+- [Sprints and acceptance criteria](docs/SPRINTS.md)
+- [Module contracts and tooling](docs/MODULOS.md)
+- [Contributing](CONTRIBUTING.md)
+- [Contributor and coding-agent instructions](AGENTS.md)
 
-Código original do Rebobina licenciado sob **GPL-2.0-only** — veja [LICENSE](LICENSE). Projeto experimental, **sem garantias**.
+### Host development, photography, and Soup Engine
+
+- [CR2 JPEG preview development on Linux](docs/CR2-DESENVOLVIMENTO-HOST.md)
+- [Read-only CR2 preview inspection](docs/CR2-INSPECAO-HOST.md)
+- [Protected JPEG output and temporary-file recovery](docs/SAIDA-SEGURA.md)
+- [Simulated HAL API and fault injection](docs/HAL-SIMULADA.md)
+- [Soup Engine porting research](docs/SOUP-ADAPTACAO.md)
+- [Soup Engine sanitizer findings](docs/SOUP-SANITIZERS.md)
+- [Visual simulator guide](docs/SIMULADOR-VISUAL.md)
+- [Development without a CF reader](docs/SPRINT-SEM-CF.md)
+
+### Research, sprint reports, and architectural decisions
+
+- [Original EOS 5D platform research](docs/5DC-PLATAFORMA.md)
+- [Sprint 1 test report](docs/SPRINT1-TESTES.md)
+- [Sprint 1 evidence and references](docs/REFERENCIAS-SPRINT1.md)
+- [Sprint 2 ARM and host UI foundation](docs/SPRINT2-BASE.md)
+- [Sprint 3 first-boot checklist](docs/SPRINT3-CHECKLIST.md)
+- [Sprint 5 Linux module prototype](docs/SPRINT5-PROTOTIPO.md)
+- [Sprint 6 Soup Engine port plan](docs/SPRINT6-SOUP-PORT.md)
+- [Sprint 7 reliability tests](docs/SPRINT7-TESTES.md)
+- [Sprint 8 future distribution](docs/SPRINT8-DISTRIBUICAO.md)
+- [Progress report: Sprints 2, 5, and 7](docs/RELATORIO-AVANCO.md)
+- [ADR 0002: browser simulator and C core](docs/decisions/0002-simulador-host.md)
+- [ADR 0003: deterministic host HAL](docs/decisions/0003-hal-deterministica.md)
+- [ADR 0004: exclusive output publication](docs/decisions/0004-publicacao-exclusiva.md)
+- [ADR 0005: checking CR2 preview bounds](docs/decisions/0005-cr2-preview-validacao.md)
+- [ADR 0006: Linux output backend](docs/decisions/0006-hal-posix-segura.md)
+
+## Credits and license
+
+Rebobina is an independent project **not affiliated with Canon or the Magic Lantern team**. We acknowledge the [Magic Lantern community](https://github.com/reticulatedpines/magiclantern_simplified) and the [Soup Engine contributors](https://github.com/jiijii0/soup-engine).
+
+The host simulator, HALs, and module manager are original Rebobina components. Pinned GPLv2 Soup Engine source code is downloaded into a temporary build directory for testing; **Soup Engine is not integrated into an installable camera release**. Any future reuse must preserve copyright notices, attribution, and license requirements.
+
+Original Rebobina code is licensed under **GPL-2.0-only**—see [LICENSE](LICENSE). Experimental software, provided **without warranty**.
