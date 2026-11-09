@@ -18,3 +18,5 @@ Projeto: **Rebobina** — arquitetura modular experimental para Canon EOS 5D Cla
 13. O código `engine/look.c` do Soup Engine emite aviso `-Wstringop-overflow` no GCC 15; registrar o aviso e não mascarar possíveis defeitos de memória na câmera.
 14. A função upstream `se_cr2_find_preview` não comprova sozinha que o comprimento JPEG cabe no arquivo: usar o wrapper defensivo `rb_cr2_host_find_preview` nos testes host e **não** declarar validação de RAW com um envelope TIFF sintético.
 15. UBSan encontra deslocamento negativo indefinido em `engine/jpeg_enc.c`; `tools/soup_host.py` gera correção SOMENTE na cópia de sanitizador. Não aplicar silenciosamente no upstream ou no firmware. Ver `docs/SOUP-SANITIZERS.md`.
+
+16. `src/host/hal_posix.c` é **somente Linux**, com `renameat2(RENAME_NOREPLACE)`, não representa CF/FAT nem VxWorks. `rebobina-cr2-develop` processa apenas **preview JPEG** de CR2; nunca afirmar que decodifica RAW Bayer. Não remover nomes finais nem `.TMP` automaticamente fora do escopo de uma falha própria. Ver `docs/CR2-DESENVOLVIMENTO-HOST.md`.

@@ -1,8 +1,14 @@
 # Preparação da adaptação do Soup Engine ao Rebobina
 
-**Sprint 6 — Soup 800/Portra/Acros testados em pixels sintéticos; preview JPEG extraído de envelope CR2 artificial; imagens CR2 reais e câmera permanecem pendentes.**
+**Sprint 6 — CLI Linux do Rebobina processa preview CR2 sintético com Soup e publica JPEG via HAL POSIX, comparado byte a byte com referência; CR2 reais/câmera pendentes.**
 
 Fonte pinada para análise: [`jiijii0/soup-engine@6422c86b...`](https://github.com/jiijii0/soup-engine/tree/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src). A integração existente na 5D utiliza hooks da versão de 2012 do Magic Lantern e não pode ser transferida automaticamente para o Rebobina.
+
+## CLI de processamento de preview para Linux
+
+O executável `build/rebobina-cr2-develop` conecta o wrapper defensivo do preview JPEG, o parser/decoder/efeitos/encoder originais do Soup e `rb_output` com uma HAL Linux de saída exclusiva (não a HAL RAM), num diretório indicado pelo usuário. Na CI, o JPEG gerado foi **idêntico byte a byte** ao `out/previewcheck` original, para o mesmo envelope CR2 **sintético**, stock Soup 800 e escala 1. Os testes rejeitam destino existente, arquivos truncados, symlink no diretório e traversal. [Guia completo](CR2-DESENVOLVIMENTO-HOST.md).
+
+**Este pipeline lê o JPEG embutido, não decodifica o RAW do sensor.** Também não foi testado com CR2 real da Canon nem adaptado aos serviços de arquivo VxWorks.
 
 ## Evidência executável: motor upstream + HAL
 

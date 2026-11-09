@@ -9,6 +9,20 @@ O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a 
 > [!IMPORTANT]
 > **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
 
+## Desenvolvimento de JPEG a partir de CR2 — ferramenta Linux
+
+O Rebobina agora tem um **desenvolvedor de preview JPEG de CR2 no computador**, conectado ao motor real do Soup Engine: abre um CR2 somente para leitura, identifica o preview JPEG, aplica um perfil `.fs` e cria um **novo JPEG**, sem sobrescrever fotos existentes. A saída utiliza `rb_output` e uma HAL específica para Linux (`openat`, `fsync`, `renameat2(RENAME_NOREPLACE)`). **Não processa diretamente o RAW Bayer e não é software para instalar na Canon.**
+
+```sh
+python3 tools/soup_host.py --fetch
+mkdir -p ./rebobina-saidas
+./build/rebobina-cr2-develop /caminho/foto.CR2 \
+  ./build/soup-upstream/Canon-EOS-5D/src/stocks/portra.fs \
+  ./rebobina-saidas FOTO-PORTRA.JPG 2
+```
+
+Na CI, o Rebobina produziu um JPEG **idêntico byte a byte** ao `previewcheck` do Soup Engine, usando um envelope CR2 **sintético**, e rejeitou colisão de saída, truncamento e caminhos inseguros. **Ainda não há uma amostra CR2 real validada.** Leia [guia da CLI e limitações](docs/CR2-DESENVOLVIMENTO-HOST.md) e [ADR 0006](docs/decisions/0006-hal-posix-segura.md).
+
 ## Inspeção de CR2 e testes de sanitizadores (host)
 
 O Rebobina agora tem um **inspector de previews JPEG embutidos em CR2**, somente leitura, que verifica offsets, limites do arquivo e dimensões com o parser original do Soup Engine. A CI extrai um JPEG de um **envelope CR2 sintético, sem RAW Canon real**, aplica o perfil Soup 800 com a ferramenta de referência e gera outro JPEG, sem alterar a entrada.
@@ -143,6 +157,8 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 - [HAL simulada: contrato, falhas e testes](docs/HAL-SIMULADA.md)
 - [JPEG em duas fases e recuperação de temporários](docs/SAIDA-SEGURA.md)
 - [Inspeção defensiva de CR2 e JPEG embutido](docs/CR2-INSPECAO-HOST.md)
+- [Desenvolvedor de preview CR2 com Soup Engine no Linux](docs/CR2-DESENVOLVIMENTO-HOST.md)
+- [ADR 0006: backend Linux com publicação exclusiva](docs/decisions/0006-hal-posix-segura.md)
 - [Testes de sanitizador e ajuste experimental do Soup](docs/SOUP-SANITIZERS.md)
 - [ADR 0005: validação de offsets CR2](docs/decisions/0005-cr2-preview-validacao.md)
 - [ADR 0004: publicação sem sobrescrita](docs/decisions/0004-publicacao-exclusiva.md)

@@ -13,11 +13,17 @@ A API em `include/rebobina/output.h` e `src/core/output.c` segue esta sequência
 1. `rb_output_init(&out)`: inicializa o contexto local, uma vez, antes da primeira tentativa.
 2. `rb_output_begin(&out, hal, "FILME.JPG")`: cria **`FILME.JPG.TMP`**, exclusivo, em vez de tocar na saída final. Um temporário que já exista impede novo `begin` até recuperação explícita.
 3. `rb_output_append(&out, data, n)`: escreve em loop enquanto a HAL retorna sucesso com **contagem positiva de bytes**. Uma escrita parcial sem erro é completada. Falha, contagem zero ou contagem inválida marcam a transação como não publicável.
-4. `rb_output_commit(&out)`: solicita `sync`, fecha o temporário e faz `rename_noreplace` — **não substitui** um destino existente. Se qualquer etapa falhar, o nome final não é publicado.
+4. `rb_output_commit(&out)`: solicita `sync`, fecha o temporário e faz `rename_noreplace` — **não substitui** um destino existente. Se qualquer etapa falhar, o nome final **pode não ser publicado**; no backend POSIX, a falha de `fsync` **após** o rename pode produzir erro mesmo que o nome final já exista. Nunca apagar o destino automaticamente nesse caso.
 5. `rb_output_abort(&out)`: tenta fechar e remover **somente o temporário**, preservando o destino e o RAW. Se a mídia estiver indisponível, pode falhar e deixar um temporário órfão.
 6. Depois de reinicialização simulada, `rb_output_discard_orphan(hal, "FILME.JPG")` permite remover **explicitamente** o temporário, e `rb_output_init` prepara um **novo** contexto da aplicação.
 
 Ações de recuperação não são automáticas no boot. Em um produto real, a pessoa deve poder inspecionar/recuperar dados; nada deve apagar fotos existentes silenciosamente.
+
+## Backend Linux POSIX: saída real de teste
+
+Além do mock RAM, `src/host/hal_posix.c` implementa um backend **apenas para Linux** com diretório de saída explícito, `O_EXCL`, `O_NOFOLLOW`, `fsync` de arquivo e diretório, e `renameat2(RENAME_NOREPLACE)`. O programa `rebobina-cr2-develop` usa essa HAL para criar JPEGs em arquivos reais, sem substituição de destino. A implementação recusa symlinks e traversal. [Detalhes e limitações](CR2-DESENVOLVIMENTO-HOST.md), [ADR 0006](decisions/0006-hal-posix-segura.md).
+
+**Essa implementação não representa o filesystem da câmera Canon** e não substitui a validação futura em FAT/VxWorks.
 
 ## Semântica do mock em RAM
 
@@ -55,4 +61,4 @@ A compilação sob GCC 15 ainda imprime um aviso upstream `-Wstringop-overflow` 
 - Avaliar pilhas, consumo de RAM, latência e concorrência com captura de fotos;
 - Testar com hardware descartável e protocolo de recuperação; nenhum teste host comprova segurança do CF real.
 
-O fluxo de processamento **CR2 → Soup completo → JPEG** ainda não existe no Rebobina. Por enquanto temos um perfil real aplicado **a pixels sintéticos** e um JPEG real codificado pelo upstream em um filesystem simulado.
+O fluxo de **preview JPEG de CR2 → Soup Engine → JPEG** existe agora no **host Linux**, com arquivo final real e publicação exclusiva. A validação automatizada usa um envelope CR2 sintético; não existe decodificação RAW Bayer nem suporte físico à Canon. A execução na câmera permanece pendente.

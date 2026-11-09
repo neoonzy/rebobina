@@ -44,7 +44,8 @@ Isso comprova o fluxo de **pré-visualização de um container sintético**; a �
 
 1. Validar cabeçalho, offset e tamanho em um **CR2 real da 5D Classic**, lido e preservado sem alterações.
 2. Executar `se_jpeg_decode_scaled` no preview completo de um **CR2 real autorizado** e testar uma entrada truncada (a decodificação de fixture sintética já foi testada).
-3. Conectar a saída JPEG do Soup e os arquivos de filme `.fs` ao adaptador de publicação em duas fases (`rb_output`) num protótipo que trabalhe com fotos reais **somente no computador**, sem sobrescrever originais.
+3. [x] Conectar preview JPEG Soup + arquivo `.fs` ao fluxo de publicação em duas fases num protótipo **Linux host**, ainda com envelope CR2 sintético; [documentação](CR2-DESENVOLVIMENTO-HOST.md).
+4. [ ] Testar em fotografias reais autorizadas e medir fidelidade EXIF.
 4. Ampliar testes ASan/UBSan para arquivos maiores/CR2 reais e revisar o aviso ainda pendente de halation em `engine/look.c` ([evidências](SOUP-SANITIZERS.md)).
 5. **Só depois**, adaptar esse caminho para os serviços reais de arquivos Canon/VxWorks, testados na 5D com firmware 1.1.1.
 
