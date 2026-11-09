@@ -210,7 +210,7 @@ def main():
             str(src / "stocks" / "soup800.fs"), "1", str(developed)
         ])
         jpeg = developed.read_bytes()
-        if len(jpeg) <= 100 or not jpeg.startswith(b"\\xff\\xd8") or not jpeg.endswith(b"\\xff\\xd9"):
+        if len(jpeg) <= 100 or not jpeg.startswith(bytes((0xff, 0xd8))) or not jpeg.endswith(bytes((0xff, 0xd9))):
             raise RuntimeError("previewcheck nao produziu JPEG sintético reconhecivel")
         if hashlib.sha256(sample.read_bytes()).hexdigest() != original_sha:
             raise RuntimeError("previewcheck ou cr2-inspect alteraram a entrada")
