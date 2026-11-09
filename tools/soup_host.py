@@ -173,10 +173,6 @@ def main():
         "-lm", "-o", str(stock_out)
     ])
     stocks_to_test = ("soup800.fs", "portra.fs", "acros.fs")
-    original_outputs = {
-        stock: capture_output([str(stock_out), str(src / "stocks" / stock)])
-        for stock in stocks_to_test
-    }
     # UBSan encontrou shift negativo em jpeg_enc.c:353; testamos o ajuste
     # so numa copia em build/, sem alterar codigo do motor de referencia.
     if not shutil.which("clang"):
@@ -200,11 +196,17 @@ def main():
         str(src / "engine" / "wb.c"),
         "-lm", "-o", str(san_out)
     ])
-    for stock in stocks_to_test:
-        actual = capture_output([str(san_out), str(src / "stocks" / stock)])
-        if actual != original_outputs[stock]:
-            raise RuntimeError(f"output JPEG do stock {stock} divergiu com o patch de UB")
-    print("OK: 3 perfis Soup em builds normal + ASan/UBSan, resultados identicos.", flush=True)
+    with tempfile.TemporaryDirectory(prefix="rb-stock-comparison-", dir=str(ROOT / "build")) as tmp:
+        for stock in stocks_to_test:
+            base_output = Path(tmp) / (stock + ".baseline.jpg")
+            san_output = Path(tmp) / (stock + ".sanitized.jpg")
+            stock_path = src / "stocks" / stock
+            capture_output([str(stock_out), str(stock_path), str(base_output)])
+            capture_output([str(san_out), str(stock_path), str(san_output)])
+            if base_output.read_bytes() != san_output.read_bytes():
+                raise RuntimeError(f"JPEG do stock {stock} divergiu byte a byte após correção de UB")
+            print(f"OK: {stock}: {base_output.stat().st_size} bytes identicos", flush=True)
+    print("OK: 3 perfis Soup normais e ASan/UBSan, JPEGs comparados byte a byte.", flush=True)
     # CR2 host: header TIFF sintetico contem JPEG feito pelo proprio Soup.
     cr2_out = ROOT / "build" / "soup-cr2-preview"
     cr2_sources = [
