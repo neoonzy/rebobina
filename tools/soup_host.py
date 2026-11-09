@@ -6,9 +6,11 @@ Copia de codigo GPLv2 upstream e mantida em build/soup-upstream (ignoravel).
 """
 import argparse
 from pathlib import Path
+import hashlib
 import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://github.com/jiijii0/soup-engine.git"
@@ -194,6 +196,26 @@ def main():
     if result.returncode != 2:
         raise RuntimeError("cr2-inspect nao rejeitou chamada sem arquivo")
     print("OK: CR2 header sintetico + CLI de inspecao somente leitura.", flush=True)
+    # Caminho inteiro do upstream: envelope TIFF/CR2 artificial -> preview
+    # JPEG -> Soup 800 -> JPEG de saida. NAO e uma foto Canon/RAW verdadeira.
+    execute(["make", "-C", str(src), "out/previewcheck"], timeout=120)
+    with tempfile.TemporaryDirectory(prefix="rb-synthetic-cr2-", dir=str(ROOT / "build")) as tmp:
+        sample = Path(tmp) / "synthetic-no-raw.CR2"
+        developed = Path(tmp) / "soup800.jpg"
+        execute([str(cr2_out), str(sample)])
+        original_sha = hashlib.sha256(sample.read_bytes()).hexdigest()
+        execute([str(inspect_out), str(sample)])
+        execute([
+            str(src / "out" / "previewcheck"), str(sample),
+            str(src / "stocks" / "soup800.fs"), "1", str(developed)
+        ])
+        jpeg = developed.read_bytes()
+        if len(jpeg) <= 100 or not jpeg.startswith(b"\\xff\\xd8") or not jpeg.endswith(b"\\xff\\xd9"):
+            raise RuntimeError("previewcheck nao produziu JPEG sintético reconhecivel")
+        if hashlib.sha256(sample.read_bytes()).hexdigest() != original_sha:
+            raise RuntimeError("previewcheck ou cr2-inspect alteraram a entrada")
+        print("OK: envelope CR2 sintetico -> preview -> Soup 800 -> JPEG",
+              f"({len(jpeg)} bytes, arquivo de entrada inalterado)", flush=True)
     print("OK: testes do motor Soup original + smoke de integracao HAL; "
           "SEM integracao no firmware/camera.", flush=True)
 
