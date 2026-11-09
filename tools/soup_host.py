@@ -232,6 +232,42 @@ def main():
         str(ROOT / "src" / "host" / "cr2_host.c"),
         *cr2_sources, "-lm", "-o", str(inspect_out)
     ])
+    develop_out = ROOT / "build" / "rebobina-cr2-develop"
+    execute([
+        "cc", "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+        "-Wno-error=stringop-overflow",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "src" / "host" / "cr2_develop.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        str(ROOT / "src" / "host" / "hal_posix.c"),
+        str(ROOT / "src" / "core" / "output.c"),
+        *cr2_sources,
+        str(src / "engine" / "stock.c"),
+        str(src / "engine" / "look.c"),
+        str(src / "engine" / "grade.c"),
+        str(src / "engine" / "lut.c"),
+        "-lm", "-o", str(develop_out)
+    ])
+    develop_san_out = ROOT / "build" / "rebobina-cr2-develop-sanitized"
+    sanitized_cr2_sources = [
+        str(compatible_encoder) if path.endswith("/jpeg_enc.c") else path
+        for path in cr2_sources
+    ]
+    execute([
+        "clang", "-std=c11", "-O1", "-g", "-Wall", "-Wextra",
+        "-fsanitize=address,undefined", "-fno-sanitize-recover=all",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "src" / "host" / "cr2_develop.c"),
+        str(ROOT / "src" / "host" / "cr2_host.c"),
+        str(ROOT / "src" / "host" / "hal_posix.c"),
+        str(ROOT / "src" / "core" / "output.c"),
+        *sanitized_cr2_sources,
+        str(src / "engine" / "stock.c"),
+        str(src / "engine" / "look.c"),
+        str(src / "engine" / "grade.c"),
+        str(src / "engine" / "lut.c"),
+        "-lm", "-o", str(develop_san_out)
+    ])
     # CLI nao modifica arquivos; um argumento inválido e rejeitado.
     result = subprocess.run([str(inspect_out)], capture_output=True, text=True)
     if result.returncode != 2:
@@ -255,6 +291,64 @@ def main():
             raise RuntimeError("previewcheck nao produziu JPEG sintético reconhecivel")
         if hashlib.sha256(sample.read_bytes()).hexdigest() != original_sha:
             raise RuntimeError("previewcheck ou cr2-inspect alteraram a entrada")
+        # Rebobina agora exerce o MESMO pipeline completo em C,
+        # mas publica por rb_output numa HAL POSIX confinada ao diretorio.
+        target_dir = Path(tmp) / "output"
+        target_dir.mkdir()
+        stock_path = src / "stocks" / "soup800.fs"
+        develop_cmd = [
+            str(develop_out), str(sample), str(stock_path),
+            str(target_dir), "REBOBINA.JPG", "1"
+        ]
+        execute(develop_cmd)
+        dst = target_dir / "REBOBINA.JPG"
+        if dst.read_bytes() != jpeg:
+            raise RuntimeError("JPEG Rebobina diferente do previewcheck byte a byte")
+        # ASan/UBSan do pipeline inteiro, usando a correção de UB apenas
+        # na cópia do encoder, sem tocar no upstream ou no build normal.
+        execute([
+            str(develop_san_out), str(sample), str(stock_path),
+            str(target_dir), "SANITIZED.JPG", "1"
+        ])
+        if (target_dir / "SANITIZED.JPG").read_bytes() != jpeg:
+            raise RuntimeError("CLI completa sob ASan/UBSan divergiu da referencia")
+        if (target_dir / "REBOBINA.JPG.TMP").exists():
+            raise RuntimeError("temporario nao foi limpo apos sucesso")
+        if hashlib.sha256(sample.read_bytes()).hexdigest() != original_sha:
+            raise RuntimeError("Rebobina alterou o CR2 de entrada")
+
+        # Nunca substituir JPEG existente (nem seu tamanho / hash).
+        result = subprocess.run(develop_cmd, capture_output=True, text=True)
+        if result.returncode == 0 or dst.read_bytes() != jpeg:
+            raise RuntimeError("desenvolvedor sobrescreveu um JPEG existente")
+        if (target_dir / "REBOBINA.JPG.TMP").exists():
+            raise RuntimeError("a colisao deixou temporario no diretorio")
+
+        # Entradas truncadas nao devem publicar arquivos finais.
+        truncated = Path(tmp) / "TRUNC.CR2"
+        truncated.write_bytes(sample.read_bytes()[:140])
+        bad = subprocess.run(
+            [str(develop_out), str(truncated), str(stock_path),
+             str(target_dir), "TRUNC.JPG", "1"],
+            capture_output=True, text=True
+        )
+        if bad.returncode == 0 or (target_dir / "TRUNC.JPG").exists():
+            raise RuntimeError("preview truncado publicou JPEG indevidamente")
+
+        # Diretorio symlink: proibido. Nome com traversal: proibido.
+        shortcut = Path(tmp) / "link"
+        shortcut.symlink_to(target_dir, target_is_directory=True)
+        for output_dir, name in ((shortcut, "SYMLINK.JPG"),
+                                 (target_dir, "../ESCAPE.JPG")):
+            res = subprocess.run([
+                str(develop_out), str(sample), str(stock_path),
+                str(output_dir), name, "1"
+            ], capture_output=True, text=True)
+            if res.returncode == 0:
+                raise RuntimeError("saida insegura foi aceita")
+        print("OK: CLI Rebobina e previewcheck: JPEGs identicos; "
+              "colisao/truncamento/symlink/traversal rejeitados, CR2 preservado",
+              flush=True)
         print("OK: envelope CR2 sintetico -> preview -> Soup 800 -> JPEG",
               f"({len(jpeg)} bytes, arquivo de entrada inalterado)", flush=True)
     print("OK: testes do motor Soup original + smoke de integracao HAL; "

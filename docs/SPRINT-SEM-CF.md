@@ -30,7 +30,8 @@ Não interromper o desenvolvimento por ausência de hardware de teste, nem dar p
 - [x] Aplicar um perfil fotográfico real **Soup 800** a RGB sintético 8×8, salvar JPEG com publicação em duas fases e testar falhas da saída no host ([guia](SAIDA-SEGURA.md)).
 - [x] Inspecionar o preview de envelope CR2 **sintético**; extrair, decodificar e desenvolver o JPEG pelo `previewcheck`, preservando entrada ([guia](CR2-INSPECAO-HOST.md)).
 - [x] Rodar Soup 800, Portra e Acros com ASan/UBSan, validar saída JPEG idêntica à referência e registrar UB do encoder ([guia](SOUP-SANITIZERS.md)).
-- [ ] Validar o processamento de uma fotografia real/CR2 e integrar os demais perfis sem perder originais.
+- [x] Implementar CLI Linux do preview CR2 → perfil Soup → JPEG com backend POSIX e publicação exclusiva; referência idêntica byte a byte em **CR2 sintético** ([guia](CR2-DESENVOLVIMENTO-HOST.md)).
+- [ ] Validar o processamento de uma fotografia **CR2 real da 5D** e integrar os demais perfis sem perder originais.
 - [ ] Validar o firmware 1.1.1 no corpo 5D e confirmar o primeiro boot do Rebobina.
 - [ ] Testar menus, desligamento e módulos na câmera.
 
