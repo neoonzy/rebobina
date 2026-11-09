@@ -136,7 +136,34 @@ def main():
         str(src / "engine" / "wb.c"),
         "-lm", "-o", str(stock_out)
     ])
-    execute([str(stock_out), str(src / "stocks" / "soup800.fs")])
+    stocks_to_test = ("soup800.fs", "portra.fs", "acros.fs")
+    for stock in stocks_to_test:
+        execute([str(stock_out), str(src / "stocks" / stock)])
+    # Verifica o caminho de halation/grain com sanitizadores dinamicos,
+    # inclusive a rotina upstream que produz -Wstringop-overflow em GCC.
+    if not shutil.which("clang"):
+        raise RuntimeError("clang requerido para ASan/UBSan do processamento Soup")
+    san_out = ROOT / "build" / "soup-stock-sanitized"
+    execute([
+        "clang", "-std=c11", "-O1", "-g", "-Wall", "-Wextra",
+        "-fsanitize=address,undefined", "-fno-sanitize-recover=all",
+        "-DSE_HOSTED", "-I", str(ROOT / "include"), "-I", str(src / "engine"),
+        str(ROOT / "tests" / "soup_stock_output.c"),
+        str(ROOT / "src" / "host" / "hal_sim.c"),
+        str(ROOT / "src" / "core" / "output.c"),
+        str(src / "engine" / "se.c"),
+        str(src / "engine" / "jpeg_enc.c"),
+        str(src / "engine" / "jpeg_dec.c"),
+        str(src / "engine" / "stock.c"),
+        str(src / "engine" / "look.c"),
+        str(src / "engine" / "grade.c"),
+        str(src / "engine" / "lut.c"),
+        str(src / "engine" / "wb.c"),
+        "-lm", "-o", str(san_out)
+    ])
+    for stock in stocks_to_test:
+        execute([str(san_out), str(src / "stocks" / stock)])
+    print("OK: 3 perfis Soup em builds normal + ASan/UBSan.", flush=True)
     # CR2 host: header TIFF sintetico contem JPEG feito pelo proprio Soup.
     cr2_out = ROOT / "build" / "soup-cr2-preview"
     cr2_sources = [
