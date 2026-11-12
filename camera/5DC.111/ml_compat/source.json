@@ -1,0 +1,43 @@
+{
+  "target": "5DC.111",
+  "upstream": {
+    "project": "Magic Lantern Team",
+    "repository": "frantony/magic-lantern",
+    "commit": "a3454ebed3f6adcd165ee9382f451f917d989253",
+    "date": "2013-08-08",
+    "license": "GPL-2.0",
+    "status": "historical-community-fork",
+    "paths": [
+      "platform/5DC.111/gui.h",
+      "platform/5DC.111/stubs.S",
+      "include/stub.h",
+      "platform/5DC.111/init.c",
+      "platform/5DC.111/local_entry.S"
+    ]
+  },
+  "rom_symbols": {
+    "FIO_OpenFile": "0xFFAE5B1C",
+    "FIO_ReadFile": "0xFFAE5B54",
+    "FIO_WriteFile": "0xFFAE5B6C",
+    "FIO_CloseFile": "0xFFAE5B78",
+    "FIO_CreateFile": "0xFFAE5B2C",
+    "AllocateMemory": "0xFFB2F664",
+    "FreeMemory": "0xFFB2F680",
+    "task_create": "0xFFB18B40",
+    "GUI_Control": "0xFF8190D0",
+    "msleep": "0xFFB187F4"
+  },
+  "button_codes": {
+    "RB_5DC_ML_WHEEL_UP": "0x0",
+    "RB_5DC_ML_WHEEL_DOWN": "0x1",
+    "RB_5DC_ML_PRESS_SET": "0x2",
+    "RB_5DC_ML_MENU": "0x3",
+    "RB_5DC_ML_TRASH": "0x7",
+    "RB_5DC_ML_PRESS_UP": "0xF",
+    "RB_5DC_ML_PRESS_DOWN": "0x16"
+  },
+  "historical_restartstart": "0x00980000",
+  "hardware_verified": false,
+  "base_2012_ml_sha256": null,
+  "scope": "offline-only"
+}
