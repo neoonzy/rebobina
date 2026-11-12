@@ -4,6 +4,9 @@
 
 > Este documento não é um guia de instalação nem atesta um firmware seguro. Os endereços apresentados são **afirmações do código do port Soup Engine** para um binário Magic Lantern específico de 2012. Não foram medidos pelo Rebobina em hardware. Nenhum endereço deve ser reutilizado sem validar a build, a finalidade e o contexto de execução.
 
+
+> **Fonte histórica localizada em 12/11/2026:** [Magic Lantern 2013 com platform/5DC.111](https://github.com/frantony/magic-lantern/tree/a3454ebed3f6adcd165ee9382f451f917d989253/platform/5DC.111). Inclui código VxWorks de inicialização, eventos, endereços de ROM e configuração de memória específicos da 5D Classic. Esta árvore está num **fork comunitário com commit fixado**, sem comprovar correspondência com o executável 2012 usado pelo Soup. Parte da pesquisa foi reaproveitada com créditos e **testes offline**; consulte [reuso do Magic Lantern](ML-5DC-REUSO.md).
+
 ## 1. Identidade do equipamento e proveniência
 
 - **Modelo:** Canon EOS 5D *Classic* (primeira 5D), firmware Canon **1.1.1**. Não é 5D Mark II.
@@ -20,7 +23,8 @@
 4. [Soup Engine: cam.h — funções Canon/ML](https://github.com/jiijii0/soup-engine/blob/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src/ml/payload/cam.h).
 5. [Soup Engine: start.S — entradas e tarefas](https://github.com/jiijii0/soup-engine/blob/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src/ml/payload/start.S).
 6. [Soup Engine: payload.ld — regiões de memória sugeridas pelo port](https://github.com/jiijii0/soup-engine/blob/6422c86b4530a5bdb4c5619f5287044ae7c661e3/Canon-EOS-5D/src/ml/payload/payload.ld).
-7. [Magic Lantern moderno: arquitetura documentada — foco em DryOS, NÃO 5D Classic](https://github.com/reticulatedpines/magiclantern_simplified/blob/142472e95054d73640f50789ac0fd66325499d82/developer_guide/03_00_architecture.md).
+7. [Magic Lantern histórico — 5DC.111, commit 2013 fixado](https://github.com/frantony/magic-lantern/tree/a3454ebed3f6adcd165ee9382f451f917d989253/platform/5DC.111).
+8. [Magic Lantern moderno: arquitetura documentada — foco em DryOS, NÃO 5D Classic](https://github.com/reticulatedpines/magiclantern_simplified/blob/142472e95054d73640f50789ac0fd66325499d82/developer_guide/03_00_architecture.md).
 
 O inventário legível por máquina está em [`data/5dc.111-evidence.json`](data/5dc.111-evidence.json). Ele é validado por testes offline para impedir erros de edição, mas isso **não valida as hipóteses no hardware**.
 

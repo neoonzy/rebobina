@@ -9,7 +9,8 @@ CORE = src/core/registry.c
 DEMO = src/host/main.c modules/hello/hello.c $(CORE)
 TEST = tests/test_registry.c $(CORE)
 UI_TEST = tests/test_ui.c src/core/ui.c
-ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/manager.o build/arm/output.o build/arm/hal_sim.o build/arm/probe.o
+ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/manager.o build/arm/output.o build/arm/hal_sim.o build/arm/probe.o \
+           build/arm/5dc_ml_input.o build/arm/5dc_ml_rom_stubs.o
 
 .PHONY: all demo hal-demo test sim-ui web-sim check-modules audit-platform arm-objects plugin-demo test-plugins clean
 
@@ -113,12 +114,24 @@ build/arm/probe.o: camera/5DC.111/probe.c include/rebobina/ui.h include/rebobina
 	@mkdir -p build/arm
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
 
+build/arm/5dc_ml_input.o: camera/5DC.111/ml_compat/input.c camera/5DC.111/ml_compat/input.h include/rebobina/ui.h
+	@mkdir -p build/arm
+	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
+
+build/arm/5dc_ml_rom_stubs.o: camera/5DC.111/ml_compat/rom_stubs.S
+	@mkdir -p build/arm
+	$(ARM_CC) --target=arm-none-eabi -mcpu=arm946e-s -marm -x assembler-with-cpp -c -o $@ $<
+
+build/test-5dc-ml-input: tests/test_5dc_ml_input.c camera/5DC.111/ml_compat/input.c src/core/ui.c camera/5DC.111/ml_compat/input.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -Icamera/5DC.111/ml_compat -o $@ tests/test_5dc_ml_input.c camera/5DC.111/ml_compat/input.c src/core/ui.c
 arm-objects: $(ARM_OBJS)
 	@for f in $(ARM_OBJS); do \
 	  readelf -h "$$f" | grep -Eq 'Machine:[[:space:]]+ARM' || exit 1; \
 	  readelf -h "$$f" | grep -Eq 'Type:[[:space:]]+REL' || exit 1; \
 	  readelf -h "$$f" | grep -Eq 'Class:[[:space:]]+ELF32' || exit 1; \
 	done
+	python3 tools/ml_5dc_audit.py --elf build/arm/5dc_ml_rom_stubs.o
 	@echo "OK: objetos ARM ELF32 relocaveis (NAO sao firmware instalavel)"
 
 demo: build/rebobina-host
@@ -135,8 +148,9 @@ check-modules:
 
 audit-platform:
 	python3 tools/platform_audit.py check
+	python3 tools/ml_5dc_audit.py
 
-test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/test-posix build/rebobina-sim-bridge test-plugins
+test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/test-posix build/rebobina-sim-bridge build/test-5dc-ml-input test-plugins
 	./build/test-registry
 	./build/test-ui
 	./build/test-ui-stress
@@ -144,6 +158,7 @@ test: build/test-registry build/test-ui build/test-ui-stress build/test-manager 
 	./build/test-hal
 	./build/test-output
 	./build/test-posix
+	./build/test-5dc-ml-input
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:
