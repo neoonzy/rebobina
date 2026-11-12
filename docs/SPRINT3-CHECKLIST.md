@@ -1,8 +1,19 @@
 # Sprint 3 — Preparação para o primeiro boot Rebobina
 
-**Estado:** bloqueada. Não há um bootloader, linker de câmera validado ou `AUTOEXEC.BIN` Rebobina.
+**Estado:** bloqueada para código experimental. A câmera real já está em firmware Canon **1.1.1**, com teste básico de JPEG/RAW e reinicialização **confirmado pelo usuário em 11/11/2026**. Ainda não há bootloader/linker homologado ou `AUTOEXEC.BIN` Rebobina. Leia [preflight Windows/CF](5DC-WINDOWS-PREFLIGHT.md).
 
 Este documento serve para evitar que a Sprint 3 seja declarada concluída apenas porque conseguimos compilar objetos ARM na Sprint 2.
+
+## Marco físico de preparação (sem Rebobina)
+
+- [x] Atualização oficial da EOS 5D Classic para 1.1.1 — informada pelo usuário.
+- [x] Fotos JPEG e RAW, leitura no Windows e reinicialização normal — informados pelo usuário.
+- [ ] Backup independente de fotos e cartão CF **exclusivo para testes** — confirmar.
+- [ ] Pacote de referência Soup Engine identificado e hash de ZIP confirmado **na máquina Windows do usuário**.
+- [ ] Base Magic Lantern original para 5DC.111, incluindo hash, procedimento de boot flag e recuperação — ainda não verificada.
+- [ ] Build ARM do Boot Probe reproduzível (diferença histórica 500/504 bytes pendente).
+
+**Não executar a PR experimental #1 nem instalar Magic Lantern somente por causa da atualização do firmware.**
 
 ## Condições mínimas antes de escrever código de boot
 
