@@ -1,0 +1,48 @@
+name: 5DC Windows release ZIP preflight (offline only)
+
+on:
+  pull_request:
+    paths:
+      - 'tools/inspect-5dc-soup-release.ps1'
+      - '.github/workflows/5dc-windows-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-fixture:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build a synthetic ZIP and exercise read-only inspection
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'rb-5dc-fixture'
+          $films = Join-Path $root 'card/ML/FILM'
+          New-Item -ItemType Directory -Path $films -Force | Out-Null
+          $auto = [byte[]]::new(221184)
+          [Array]::Copy([Text.Encoding]::ASCII.GetBytes('gaonisoy'),0,$auto,4,8)
+          [IO.File]::WriteAllBytes((Join-Path $root 'card/AUTOEXEC.BIN'),$auto)
+          $se = [byte[]]::new(512)
+          [Array]::Copy([Text.Encoding]::ASCII.GetBytes('FILM'),0,$se,0,4)
+          [IO.File]::WriteAllBytes((Join-Path $root 'card/SE.BIN'),$se)
+          Set-Content -LiteralPath (Join-Path $films 'TEST.fs') -Value 'synthetic-only'
+          $file = Join-Path $env:RUNNER_TEMP 'rb-5dc-fixture.zip'
+          Compress-Archive -LiteralPath (Join-Path $root 'card') -DestinationPath $file
+          $expected = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
+          & ./tools/inspect-5dc-soup-release.ps1 -ZipPath $file -ExpectedSha256 $expected
+
+          $rejected = $false
+          try {
+            & ./tools/inspect-5dc-soup-release.ps1 -ZipPath $file -ExpectedSha256 ('0' * 64)
+          } catch {
+            Write-Host 'Expected mismatched digest rejection:' $_.Exception.Message
+            $rejected = $true
+          }
+          if (-not $rejected) {
+            throw 'The preflight accepted a mismatched digest.'
+          }
+          Write-Host 'PASS: Windows ZIP inspection works and rejects mismatched hash.'
