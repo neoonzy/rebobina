@@ -12,7 +12,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Read-Prefix([System.IO.Compression.ZipArchiveEntry] $Entry, [int] $Count) {
+function Read-Prefix([object] $Entry, [int] $Count) {
     $buffer = New-Object byte[] $Count
     $stream = $Entry.Open()
     try {
@@ -37,8 +37,9 @@ $info = Get-Item -LiteralPath $file -ErrorAction Stop
 if ($info.PSIsContainer) { throw 'Expected a ZIP file, not a folder.' }
 $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($hash -cne $ExpectedSha256.ToLowerInvariant()) {
-    throw ("RELEASE ZIP SHA-256 MISMATCH. Expected: {0}; got: {1}. " +
-           "Do not use this package until the new upstream release is independently reviewed.") -f $ExpectedSha256, $hash
+    $message = ("RELEASE ZIP SHA-256 MISMATCH. Expected: {0}; got: {1}. " +
+                "Do not use this package until the new upstream release is independently reviewed.") -f $ExpectedSha256, $hash
+    throw $message
 }
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
