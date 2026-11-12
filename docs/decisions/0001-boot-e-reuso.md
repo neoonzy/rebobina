@@ -8,7 +8,7 @@
 
 O Rebobina deve ser um **software próprio que roda na câmera**, e não um instalador de Magic Lantern. O Magic Lantern oferece aprendizados e código sob GPLv2, mas o port moderno `magiclantern_simplified/dev` inspecionado não possui um diretório `5DC.111/`. O Soup Engine para a primeira 5D oferece uma referência concreta de hooks em uma build Magic Lantern de 2012, mas essa base não foi identificada por SHA-256.
 
-A inicialização e o display da 5D Classic são sensíveis. Copiar patches com endereços absolutos sem identificar exatamente o executável-base não é um caminho aceitável.
+Em 12/11/2026, localizamos [código Magic Lantern 5DC.111 no snapshot histórico de 2013](https://github.com/frantony/magic-lantern/tree/a3454ebed3f6adcd165ee9382f451f917d989253/platform/5DC.111) e iniciamos reuso seletivo com atribuição GPLv2 (ver [guia](../ML-5DC-REUSO.md)). Esse snapshot ainda **não** comprova a fonte exata do binário de 2012 usado no Soup. A inicialização e o display da 5D Classic são sensíveis. Copiar patches com endereços absolutos sem identificar exatamente o executável-base não é um caminho aceitável.
 
 ## Decisão proposta
 

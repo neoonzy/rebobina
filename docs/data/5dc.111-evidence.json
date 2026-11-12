@@ -24,6 +24,12 @@
     "history": {
       "url": "https://groups.google.com/g/ml-devel/c/47_XE_cwrdQ",
       "scope": "2012 original 5DC VxWorks/bootflag development report"
+    },
+    "historical_ml": {
+      "repository": "frantony/magic-lantern",
+      "commit": "a3454ebed3f6adcd165ee9382f451f917d989253",
+      "url": "https://github.com/frantony/magic-lantern/tree/a3454ebed3f6adcd165ee9382f451f917d989253/platform/5DC.111",
+      "scope": "Historical 2013 5DC.111 actual source; no proven linkage to original Magic Lantern 2012 binary"
     }
   },
   "base_binary": {
