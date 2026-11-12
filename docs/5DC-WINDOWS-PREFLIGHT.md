@@ -1,6 +1,6 @@
 # Canon EOS 5D Classic 1.1.1 — preparação física no Windows
 
-**Atualizado em 11/11/2026. Estado: firmware Canon atualizado; primeiro boot Rebobina NÃO autorizado.**
+**Atualizado em 12/11/2026. Estado: firmware Canon 1.1.1 e fotos normais confirmados; primeiro boot Rebobina NÃO autorizado.**
 
 Este registro serve ao primeiro teste de hardware da Sprint 3. **Não cria cartão inicializável, não ativa boot flags, não instala Magic Lantern/Soup/Rebobina e não executa nenhum arquivo na câmera.**
 
@@ -16,7 +16,14 @@ Na conversa de 11/11/2026, o usuário informou que concluiu a atualização da C
 
 **Fonte da evidência:** relato do operador, não logs, fotografias ou testes executados por terceiros. Isso **não valida o Rebobina** e não substitui testes físicos de boot.
 
-Ainda é necessário confirmar backup independente e disponibilidade de **cartão CF exclusivo de testes** (idealmente diferente do cartão usado para fotos importantes), além de registrar capacidade e formato do CF.
+**Verificações adicionais informadas pelo operador em 12/11/2026:**
+- [x] **Dois cartões CF de 16 GB** disponíveis; separar um para uso cotidiano e outro exclusivamente para desenvolvimento.
+- [x] **Backup das fotos realizado**, segundo confirmação do operador.
+- [x] **SHA-256 do ZIP oficial Soup Engine para a 5D confere** com o digest da release consultada: `0f8cc374374d6692ec77836cd979ee75d2c77ae8a7a5bdd8da1cd5e6d0c9c993`.
+- [ ] Identificar o formato FAT/FAT32 de cada CF e testar operações de leitura/gravação normais no cartão de desenvolvimento sem instalar código.
+- [ ] Verificação **estrutural somente leitura** de `AUTOEXEC.BIN` / `SE.BIN` do pacote extraído; o hash do ZIP não substitui inspeção do executável legado.
+
+A confirmação do backup e do hash é **relato do usuário**, não verificação independente no sistema Windows. A disponibilidade de dois cartões não comprova que qualquer um deles já seja inicializável.
 
 ## Preparação segura no computador Windows — SEM escrever no CF
 
@@ -89,8 +96,8 @@ Fontes: [instruções e alertas do Soup Engine para a 5D](https://github.com/jii
 | Corpo | Canon EOS 5D Classic (2005) |
 | Firmware | **1.1.1 — confirmado pelo operador** |
 | Testes JPEG e RAW | **Passaram — informado pelo operador** |
-| CF de teste (capacidade/formato) | **Pendente** |
-| Fotos salvas em backup fora do cartão | **A reconfirmar** |
+| CF de teste (capacidade/formato) | **Dois CF de 16 GB relatados; formato FAT/FAT32 a verificar** |
+| Fotos salvas em backup fora do cartão | **Sim — confirmado pelo operador em 12/11/2026** |
 | Build/commit do loader ML | **Pendente** |
 | SHA-256 do AUTOEXEC do Magic Lantern original | **Pendente** |
 | SHA-256 do AUTOEXEC do Soup efetivamente usado | **Pendente** |

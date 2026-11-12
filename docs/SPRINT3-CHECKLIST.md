@@ -8,8 +8,8 @@ Este documento serve para evitar que a Sprint 3 seja declarada concluída apenas
 
 - [x] Atualização oficial da EOS 5D Classic para 1.1.1 — informada pelo usuário.
 - [x] Fotos JPEG e RAW, leitura no Windows e reinicialização normal — informados pelo usuário.
-- [ ] Backup independente de fotos e cartão CF **exclusivo para testes** — confirmar.
-- [ ] Pacote de referência Soup Engine identificado e hash de ZIP confirmado **na máquina Windows do usuário**.
+- [x] Backup das fotos relatado pelo usuário; **dois CF de 16 GB disponíveis**, sendo um reservado para testes. O formato e a identidade de cada cartão ainda precisam ser registrados.
+- [x] Hash SHA-256 do ZIP Soup Engine **informado pelo operador**, coincidente com o digest do release upstream consultado; falta análise offline dos binários incluídos (não equivale a validar o Magic Lantern original).
 - [ ] Base Magic Lantern original para 5DC.111, incluindo hash, procedimento de boot flag e recuperação — ainda não verificada.
 - [ ] Build ARM do Boot Probe reproduzível (diferença histórica 500/504 bytes pendente).
 
