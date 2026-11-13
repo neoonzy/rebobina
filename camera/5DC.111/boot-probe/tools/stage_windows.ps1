@@ -67,7 +67,7 @@ try {
         throw "Hook de init do Soup nao corresponde ao loader esperado."
     }
     $gui = Read-U32 $a (File-Off 0x00989DB4)
-    if (([long]$gui -band 0xff000000) -ne 0xeb000000) {
+    if (([long]$gui -shr 24) -ne 0xEB) {
         throw "Hook GUI do Soup nao eh um branch BL."
     }
     $imm = [long]$gui -band 0xffffff
