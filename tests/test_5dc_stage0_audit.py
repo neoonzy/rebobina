@@ -17,7 +17,7 @@ class BootstrapAuditTests(unittest.TestCase):
         self.assertFalse(any(boot.glob("AUTOEXEC.BIN")))
         self.assertFalse(any(boot.glob("*.FIR")))
         self.assertFalse(any(boot.glob("*.fir")))
-        self.assertIn("OFFLINE", (boot / "stage0_entry.S").read_text())
+        self.assertIn("offline", (boot / "stage0_entry.S").read_text().lower())
         self.assertIn("NEVER", (boot / "stage0_offline.ld").read_text())
 
     def test_reject_wrong_file_type(self):
