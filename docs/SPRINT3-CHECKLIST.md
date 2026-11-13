@@ -19,8 +19,11 @@ Este documento serve para evitar que a Sprint 3 seja declarada concluída apenas
 
 - [x] Localizado port histórico Magic Lantern **5DC.111** com fonte específica VxWorks, commit fixado e créditos GPLv2.
 - [x] Criada entrada ARM e linked ELF **próprios do Rebobina**, sem depender da instalação ou de binários do Magic Lantern, com auditoria offline. Consulte [bootstrap offline](5DC-BOOTSTRAP-OFFLINE.md).
+- [x] Diferenciar o endereço **0x00800000** do instalador histórico e **0x00980000** da imagem ML realocada, com fontes e auditador offline ([detalhes](5DC-BOOT-CHAIN.md)).
+- [x] Simular em host o fallback com falhas injetadas e confirmar chamada à **continuação Canon simulada**; **não equivale a handoff físico**.
+- [x] Vincular ao ELF ARM o pré-boot *fail-closed* (retorno por falta de observação da ROM real).
 - [ ] Demonstrar que a entrada e a RAM assumidas são apropriadas **ao loader Canon real**; o ELF offline **não é firmware instalável**.
-- [ ] Implementar boot, handoff para Canon e recuperação sem deixar o firmware congelado; não existem ainda.
+- [ ] Implementar boot, handoff **real** para a Canon e recuperação sem deixar o firmware congelado; estes mecanismos ainda **não existem**. A simulação de callbacks não fornece essas capacidades.
 
 ## Condições mínimas antes de escrever código de boot
 

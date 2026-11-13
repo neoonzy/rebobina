@@ -31,6 +31,8 @@ The following components work **on the host computer**:
 
 **Not yet implemented on the camera:** a working Rebobina boot, physical LCD/buttons, a camera-side plugin loader, a validated FAT filesystem backend, or RAW sensor processing as an on-camera module.
 
+A **5DC.111 boot-chain research audit and fail-closed preflight** now distinguish the historical installer load address (`0x00800000`) from the Magic Lantern relocated runtime (`0x00980000`). A mock Canon-continuation test verifies host-only fault paths, **not real firmware handoff**. See [5DC boot-chain research](docs/5DC-BOOT-CHAIN.md).
+
 An **offline-only linked ARM stage0 ELF** is now available with `make offline-bootstrap`. It demonstrates an independent ARM entry and a link with the portable core, **not a Canon bootable program**: no Canon card-boot loader format, firmware handoff, or hardware recovery exists. Never rename or convert the ELF to `AUTOEXEC.BIN`. See [offline bootstrap study](docs/5DC-BOOTSTRAP-OFFLINE.md) (Portuguese).
 
 The automated CR2 integration tests use a **synthetic TIFF/CR2-like envelope**, not a real Canon photograph. The CR2 developer processes the **embedded JPEG preview, not Bayer RAW sensor data**. Real EOS 5D CR2 compatibility is not yet validated.

@@ -21,3 +21,7 @@ Em `ml_compat/` temos 10 aliases da ROM e o decodificador de 7 códigos de botõ
 ## Bootstrap independente — protótipo de ligação offline
 
 O novo diretório [`bootstrap/`](bootstrap/) contém entrada ARM própria, modelo de inicialização freestanding, contrato estrutural e linker de pesquisa, **sem necessitar do Magic Lantern como dependência de build**. O alvo `make offline-bootstrap` gera apenas um `build/arm/5dc-stage0-offline.elf` que **não é carregável pela Canon**, pois não implementa formato de boot, handoff da Canon nem recuperação. Ele termina em um loop deliberado. **Não converter, renomear ou instalar na câmera.** Detalhes e créditos em [`docs/5DC-BOOTSTRAP-OFFLINE.md`](../../docs/5DC-BOOTSTRAP-OFFLINE.md).
+
+## Pesquisa de carregador e recuperação — 13/11/2026
+
+O diretório `bootstrap/` agora contém `boot_chain.[ch]` com a distinção de endereços históricos entre o instalador do Magic Lantern 2013 e a imagem realocada, classificação conservadora das flags e pré-boot com falha por padrão. `boot_handoff_mock.[ch]` exercita em **host** a continuação simulada da Canon após falhas, sem chamar a ROM real. Fonte e riscos estão detalhados em [`docs/5DC-BOOT-CHAIN.md`](../../docs/5DC-BOOT-CHAIN.md). A câmera **não está pronta para um boot experimental**.
