@@ -195,3 +195,7 @@ Foram iniciadas, sem depender do CF:
 ## Próxima ação
 
 **Sem leitor CF:** o pipeline [CR2→preview→Soup→JPEG no Linux](CR2-DESENVOLVIMENTO-HOST.md) já tem saída protegida. Próximo marco: testar **CR2 real autorizado da EOS 5D Classic**, estudar streaming com memória reduzida e revisar halation. Boot físico continua condicionado à atualização para firmware 1.1.1, leitor CF, fonte de boot verificada e procedimento de recuperação.
+
+## Marco técnico adicional (13/11/2026)
+
+Localizamos também [o instalador histórico GPLv2 da 5D Classic 1.1.1](5DC-BOOT-CHAIN.md) e distinguimos seus endereços de link dos endereços do Magic Lantern realocado. O Rebobina agora possui um *preflight* puramente funcional, auditado em CI, vinculado ao ELF offline, e testes com simulação da continuação Canon mesmo após falhas. **Não temos ainda boot/flash/write real, nem handoff de firmware ou plano de recuperação testado em hardware.**

@@ -22,7 +22,7 @@ O alvo `make offline-bootstrap` compila um **ELF32 ARM946E-S** com entrada `rb_s
 1. O ELF declara uma entrada ARM própria **`rb_stage0_entry`**, vinculada a `0x00980000` **exclusivamente como hipótese de link**.
 2. O assembly prepara a pilha de 4 KiB **em memória hipotética** e chama `rb_stage0_prepare`.
 3. A rotina C inicializa a área `.bss`, o registro de módulos e o modelo de interface do Rebobina.
-4. Executa uma verificação estrutural *sobre um descritor sintético* (5DC.111; 1.1.1; intervalo histórico); o resultado é `RB_STAGE0_RESEARCH_MATCH_ONLY`, **nunca autorização de boot**.
+4. Executa uma verificação estrutural *sobre um descritor sintético* (5DC.111; 1.1.1; intervalo histórico); o resultado é `RB_STAGE0_RESEARCH_MATCH_ONLY`, **nunca autorização de boot**. Também chama o novo [pré-boot offline](5DC-BOOT-CHAIN.md) com os endereços históricos separados (`0x00800000` do carregamento antigo e `0x00980000` da realocação do ML), **sem observação real da ROM**; nesse caso deve retornar `RB_5DC_BOOT_NO_ROM_OBSERVATION`.
 5. A entrada ARM permanece num loop deliberado. **Não há passagem de controle para a Canon nem código de restauração de firmware. Portanto, não executar na câmera**.
 
 Os endereços `0x00980000`–`0x00A00000` **não são uma reserva comprovadamente segura** para o bootstrap do Rebobina. Foram retirados do estudo histórico de realocação da antiga versão do Magic Lantern, onde também há patches de cache e memória. O linker aplica limite conservador ao **ELF de pesquisa**, não valida disponibilidade da RAM na Canon.
@@ -56,3 +56,7 @@ Esses são **testes de ligação e consistência estática**, e não simulação
 ## Decisão de produto
 
 **Rebobina será um programa próprio, não exigirá que as pessoas instalem o Magic Lantern previamente.** A compatibilidade com a 5D Classic poderá ser implementada com reuso seletivo de código GPLv2, com atribuição e alterações declaradas, desde que a cadeia de inicialização seja comprovada.
+
+## Pré-boot e continuação simulada (13/11/2026)
+
+Foi acrescentada uma [auditoria do instalador histórico da 5DC](5DC-BOOT-CHAIN.md), um classificador sem efeitos colaterais das flags de inicialização e um modelo de continuação da Canon **exclusivamente em host**. O estágio ARM continua sem handoff real e sem I/O. A simulação garante apenas que a lógica de testes não pule o callback Canon quando uma etapa simulada falhar. **Não instalar nem converter o ELF**.

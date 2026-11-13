@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "platform": "5DC.111",
+  "target_model": "Canon EOS 5D Classic",
+  "firmware": "1.1.1",
+  "source": {
+    "project": "Magic Lantern Team",
+    "repo": "frantony/magic-lantern",
+    "commit": "a3454ebed3f6adcd165ee9382f451f917d989253",
+    "date": "2013-08-08",
+    "license": "GPLv2",
+    "installer_dir": "installer/5DC.111",
+    "platform_dir": "platform/5DC.111",
+    "installer_include_in_top_level_build": false
+  },
+  "historical_address_roles": [
+    {
+      "role": "installer_raw_load",
+      "value": "0x00800000",
+      "source_path": "installer/5DC.111/link.script",
+      "hardware_verified": false
+    },
+    {
+      "role": "ml_relocated_runtime",
+      "value": "0x00980000",
+      "source_path": "platform/5DC.111/Makefile.platform.default",
+      "hardware_verified": false
+    }
+  ],
+  "bootflags": {
+    "source_path": "installer/5DC.111/bootdisk.c",
+    "flash_mapping": "0xF8000000",
+    "read_entry": "0xFFFF8AE0",
+    "read_opcode": "0xE52DE004",
+    "write_entry": "0xFFFF89F0",
+    "write_opcode": "0xE92D41F0",
+    "card_bootflag_writer": "0xFFFF4074",
+    "original_algorithm": "toggle flag word 1; reset words 0 and 2; write persistent flag and CF boot metadata",
+    "risk": "writes persistent boot state and CF metadata; never execute historical installer from Rebobina research"
+  },
+  "output_allowlist": [
+    "build/arm/5dc-stage0-offline.elf"
+  ],
+  "camera_installation_authorized": false,
+  "camera_boot_verified": false,
+  "physical_boot_recovery_verified": false,
+  "offline_preflight_status": "RESEARCH_ONLY"
+}

@@ -54,3 +54,7 @@ Os testes validam números, licença/proveniência, eventos desconhecidos e os 1
 ## Integração independente de bootstrap (13/11/2026)
 
 Além dos aliases ROM e código de botões, criamos um [ELF ARM de startup **somente offline**](5DC-BOOTSTRAP-OFFLINE.md) com entrada escrita para o Rebobina. O linker usa a faixa histórica de realocação do ML como **hipótese de pesquisa**, sem reutilizar patches arriscados de `init.c` ou operações privilegiadas de `local_entry.S`. O ELF não necessita de um `AUTOEXEC.BIN` do Magic Lantern para **ligar** e não é executável pela bootloader Canon. A fonte histórica continua creditada e ainda precisamos validar boot, handoff, RAM e recuperação.
+
+## Pesquisa do instalador GPLv2 (13/11/2026)
+
+Além do port `platform/5DC.111`, encontramos [o código histórico `installer/5DC.111`](https://github.com/frantony/magic-lantern/tree/a3454ebed3f6adcd165ee9382f451f917d989253/installer/5DC.111). Ele **alterna a boot flag persistente**, escreve metadados de boot no cartão e não consta no conjunto padrão de instaladores. Seu código **não** foi importado: extraímos apenas um contrato de pré-boot de leitura lógica e um simulador no computador. Fontes, créditos, endereços e limitações em [5DC-BOOT-CHAIN.md](5DC-BOOT-CHAIN.md). **Não autoriza uso na câmera.**

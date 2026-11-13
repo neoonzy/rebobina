@@ -16,6 +16,8 @@ HISTORICAL_LIMIT = 0x00A00000
 EXPECTED_SYMBOLS = {
     "rb_stage0_entry", "rb_stage0_prepare", "rb_stage0_check",
     "rb_registry_init", "rb_ui_init", "rb_stage0_warning",
+    "rb_5dc_boot_preflight", "rb_5dc_bootflag_classify",
+    "rb_stage0_boot_preflight_result",
     "__rb_stage0_image_start", "__rb_stage0_image_end",
     "__rb_stage0_stack_top", "__rb_stage0_bss_start", "__rb_stage0_bss_end",
 }
@@ -92,15 +94,18 @@ def audit(path):
     # Stage0 must contain no Canon ROM calls or Magic Lantern loader sources.
     boot_c = (BOOT / "stage0.c").read_text(encoding="utf-8")
     boot_asm = (BOOT / "stage0_entry.S").read_text(encoding="utf-8")
+    boot_chain = (BOOT / "boot_chain.c").read_text(encoding="utf-8")
     for forbidden in ("cache_fake(", "FIO_OpenFile(", "firmware_entry(", "EnableBootDisk("):
-        if forbidden in boot_c or forbidden in boot_asm:
+        if forbidden in boot_c or forbidden in boot_asm or forbidden in boot_chain:
             raise ValueError(f"Unexpected camera-side operation: {forbidden}")
     return {"status": "PASS_OFFLINE_ONLY", "elf": str(path),
             "entry": hex(EXPECTED_START), "segments": len(segments),
             "memory_end": hex(values["__rb_stage0_image_end"]),
             "magic_lantern_preinstall_required": False,
             "camera_boot_validated": False,
-            "camera_installable": False}
+            "camera_installable": False,
+            "real_rom_observations": False,
+            "canon_handoff_implemented": False}
 
 
 if __name__ == "__main__":
