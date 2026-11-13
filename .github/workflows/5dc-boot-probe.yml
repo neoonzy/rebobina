@@ -33,4 +33,5 @@ jobs:
           path: |
             camera/5DC.111/boot-probe/dist/SE.BIN
             camera/5DC.111/boot-probe/dist/probe-manifest.json
-          retention-days: 7
+          retention-days: 30
+          if-no-files-found: error

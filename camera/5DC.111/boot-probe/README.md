@@ -11,6 +11,10 @@
 - Todos os botões passam para a GUI Canon/Magic Lantern; não há menu Rebobina, captura ou processamento Soup Engine.
 - Não altera a ROM Canon, boot flag ou `AUTOEXEC.BIN`; **depende** do executável do Soup Engine específico da 5D Classic.
 
+## Teste físico objetivo
+
+Para executar o primeiro teste no corpo, siga o [roteiro Windows de teste físico #01](docs/TESTE-FISICO-01.md), com staging local e rollback. **É uma via experimental com dependência temporária do carregador histórico**, não um passo obrigatório do produto Rebobina final.
+
 ## Pré-requisitos
 
 1. **Canon EOS 5D Classic (2005) com firmware exatamente 1.1.1.** Não funciona na 5D Mark II/III/IV.
