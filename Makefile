@@ -12,7 +12,7 @@ UI_TEST = tests/test_ui.c src/core/ui.c
 ARM_OBJS = build/arm/registry.o build/arm/ui.o build/arm/manager.o build/arm/output.o build/arm/hal_sim.o build/arm/probe.o \
            build/arm/5dc_ml_input.o build/arm/5dc_ml_rom_stubs.o
 
-.PHONY: all demo hal-demo test sim-ui web-sim check-modules audit-platform arm-objects plugin-demo test-plugins clean
+.PHONY: all demo hal-demo test sim-ui web-sim check-modules audit-platform arm-objects offline-bootstrap plugin-demo test-plugins clean
 
 all: build/rebobina-host
 
@@ -122,6 +122,37 @@ build/arm/5dc_ml_rom_stubs.o: camera/5DC.111/ml_compat/rom_stubs.S
 	@mkdir -p build/arm
 	$(ARM_CC) --target=arm-none-eabi -mcpu=arm946e-s -marm -x assembler-with-cpp -c -o $@ $<
 
+# Only a linked ELF for offline inspection. It has no loader header or Canon
+# firmware handoff: NEVER objcopy this into AUTOEXEC.BIN / .FIR / a CF.
+ARM_BOOT_CFLAGS = $(ARM_CFLAGS) -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables
+BOOT_DIR = camera/5DC.111/bootstrap
+BOOT_OBJS = build/arm/5dc-stage0-entry.o build/arm/5dc-stage0.o build/arm/5dc-stage0-contract.o
+
+build/arm/5dc-stage0-entry.o: $(BOOT_DIR)/stage0_entry.S
+	@mkdir -p build/arm
+	$(ARM_CC) --target=arm-none-eabi -mcpu=arm946e-s -marm -c -o $@ $<
+
+build/arm/5dc-stage0.o: $(BOOT_DIR)/stage0.c $(BOOT_DIR)/stage0_contract.h
+	@mkdir -p build/arm
+	$(ARM_CC) $(ARM_BOOT_CFLAGS) -I$(BOOT_DIR) -c -o $@ $<
+
+build/arm/5dc-stage0-contract.o: $(BOOT_DIR)/stage0_contract.c $(BOOT_DIR)/stage0_contract.h
+	@mkdir -p build/arm
+	$(ARM_CC) $(ARM_BOOT_CFLAGS) -I$(BOOT_DIR) -c -o $@ $<
+
+build/arm/5dc-stage0-offline.elf: $(BOOT_OBJS) build/arm/registry.o build/arm/ui.o $(BOOT_DIR)/stage0_offline.ld
+	$(ARM_CC) --target=arm-none-eabi -mcpu=arm946e-s -marm -nostdlib -fuse-ld=lld \
+	    -Wl,--no-undefined -Wl,--build-id=none -Wl,-T,$(BOOT_DIR)/stage0_offline.ld \
+	    -o $@ $(BOOT_OBJS) build/arm/registry.o build/arm/ui.o
+	python3 tools/audit_5dc_stage0.py $@
+
+offline-bootstrap: build/arm/5dc-stage0-offline.elf
+	@echo "OFFLINE ELF ONLY: NAO usar na camera ou converter para AUTOEXEC.BIN"
+
+build/test-5dc-stage0-contract: tests/test_5dc_stage0_contract.c $(BOOT_DIR)/stage0_contract.c $(BOOT_DIR)/stage0_contract.h
+	@mkdir -p build
+	$(CC) $(CFLAGS) -I$(BOOT_DIR) -o $@ tests/test_5dc_stage0_contract.c $(BOOT_DIR)/stage0_contract.c
+
 build/test-5dc-ml-input: tests/test_5dc_ml_input.c camera/5DC.111/ml_compat/input.c src/core/ui.c camera/5DC.111/ml_compat/input.h
 	@mkdir -p build
 	$(CC) $(CFLAGS) -Icamera/5DC.111/ml_compat -o $@ tests/test_5dc_ml_input.c camera/5DC.111/ml_compat/input.c src/core/ui.c
@@ -150,7 +181,7 @@ audit-platform:
 	python3 tools/platform_audit.py check
 	python3 tools/ml_5dc_audit.py
 
-test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/test-posix build/rebobina-sim-bridge build/test-5dc-ml-input test-plugins
+test: build/test-registry build/test-ui build/test-ui-stress build/test-manager build/test-hal build/test-output build/test-posix build/rebobina-sim-bridge build/test-5dc-ml-input build/test-5dc-stage0-contract test-plugins
 	./build/test-registry
 	./build/test-ui
 	./build/test-ui-stress
@@ -159,6 +190,7 @@ test: build/test-registry build/test-ui build/test-ui-stress build/test-manager 
 	./build/test-output
 	./build/test-posix
 	./build/test-5dc-ml-input
+	./build/test-5dc-stage0-contract
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:
