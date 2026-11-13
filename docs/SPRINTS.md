@@ -12,8 +12,8 @@
 | --- | --- | --- | --- |
 | **0** | Fundação | Repositório, API protótipo, manifesto, CI e documentação | **Concluída no escopo host** |
 | **1** | Engenharia reversa e especificação | Mapa de boot, APIs, memória e decisões de reaproveitamento GPLv2 da 5D | **Em andamento: levantamento e testes offline realizados; binário-base ainda não identificado** |
-| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Mock HAL em RAM e objetos ARM testados; port Canon pendente** |
-| **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | A fazer; depende de hardware |
+| **2** | Toolchain e simulação ARM | Build reproduzível ARM e ambiente mínimo de testes do port | **Objetos ARM e ELF stage0 offline agora testáveis; boot físico/port Canon pendentes** |
+| **3** | Primeiro executável embarcado | Rebobina mínimo inicializando de forma controlada na 5D de teste | **ELF ARM próprio ligado offline; cadeia de boot Canon, handoff, recuperação e hardware pendentes** |
 | **4** | HAL e interface própria | Interface inicial, botões, arquivos, logs e serviços comuns | **Prova visual no host concluída; LCD/HAL em câmera pendentes** |
 | **5** | Módulos embarcados | Carregador versionado e primeiro módulo simples em câmera | **Gerenciador host e loader .so Linux testados; ARM/câmera pendentes** |
 | **6** | Integração Soup Engine | Soup Engine adaptado ao Rebobina, sem patch individual de `AUTOEXEC.BIN` | **CLI host CR2→preview→Soup→JPEG e HAL POSIX, saída comparada ao upstream; CR2 real/câmera pendentes** |
@@ -91,6 +91,9 @@ Foram iniciadas, sem depender do CF:
 [Plano de execução completo](SPRINT-SEM-CF.md). Esses componentes antecipam Sprints 4–6 **apenas no host**, sem alterar seus critérios físicos.
 
 ## Sprint 3 — Primeiro Rebobina na câmera
+
+**Avanço offline em 13/11/2026:** o [bootstrap próprio](5DC-BOOTSTRAP-OFFLINE.md) possui entrada ARM946E-S, inicialização mínima e linker de pesquisa que geram **somente ELF**. Não usa instalação prévia nem binário do Magic Lantern para ligar, mas **não é carregável pela câmera** e não inclui handoff da Canon. O uso de pesquisa GPLv2 histórica está documentado com créditos; segurança, boot e recuperação continuam bloqueados.
+
 
 **Objetivo:** atingir o primeiro marco real do produto: **um programa próprio executando na Canon EOS 5D Classic**.
 

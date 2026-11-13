@@ -50,3 +50,7 @@ Os testes validam números, licença/proveniência, eventos desconhecidos e os 1
 5. Só então testar em equipamento físico, começando por diagnóstico mínimo sem interferir em fotos ou firmware Canon.
 
 **Status: pesquisa e integração offline. Não copiar artefatos gerados por este port para o CF.**
+
+## Integração independente de bootstrap (13/11/2026)
+
+Além dos aliases ROM e código de botões, criamos um [ELF ARM de startup **somente offline**](5DC-BOOTSTRAP-OFFLINE.md) com entrada escrita para o Rebobina. O linker usa a faixa histórica de realocação do ML como **hipótese de pesquisa**, sem reutilizar patches arriscados de `init.c` ou operações privilegiadas de `local_entry.S`. O ELF não necessita de um `AUTOEXEC.BIN` do Magic Lantern para **ligar** e não é executável pela bootloader Canon. A fonte histórica continua creditada e ainda precisamos validar boot, handoff, RAM e recuperação.

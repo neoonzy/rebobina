@@ -17,3 +17,7 @@ Para a pesquisa de boot e memória, consulte [o levantamento da 5D](../../docs/5
 ## Reuso do Magic Lantern
 
 Em `ml_compat/` temos 10 aliases da ROM e o decodificador de 7 códigos de botões provenientes do port 5DC.111 histórico de 2013, com arquivo de proveniência, créditos e testes. Leia [origens, licença e limites](../../docs/ML-5DC-REUSO.md). **Nenhum artefato gera ou instala boot para a Canon**.
+
+## Bootstrap independente — protótipo de ligação offline
+
+O novo diretório [`bootstrap/`](bootstrap/) contém entrada ARM própria, modelo de inicialização freestanding, contrato estrutural e linker de pesquisa, **sem necessitar do Magic Lantern como dependência de build**. O alvo `make offline-bootstrap` gera apenas um `build/arm/5dc-stage0-offline.elf` que **não é carregável pela Canon**, pois não implementa formato de boot, handoff da Canon nem recuperação. Ele termina em um loop deliberado. **Não converter, renomear ou instalar na câmera.** Detalhes e créditos em [`docs/5DC-BOOTSTRAP-OFFLINE.md`](../../docs/5DC-BOOTSTRAP-OFFLINE.md).

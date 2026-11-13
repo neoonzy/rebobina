@@ -39,3 +39,7 @@ Em 12/11/2026, localizamos [código Magic Lantern 5DC.111 no snapshot histórico
 ## Evidências
 
 Consultar [levantamento técnico](../5DC-PLATAFORMA.md) e [inventário](../data/5dc.111-evidence.json). Reavaliar esta decisão ao obter fonte e binário correspondentes ao mesmo build histórico.
+
+## Decisão de implementação offline — 13/11/2026
+
+Foi criado um [protótipo de bootstrap independente](../5DC-BOOTSTRAP-OFFLINE.md) que liga um ELF ARM próprio sem depender de Magic Lantern pré-instalado ou de um `AUTOEXEC.BIN` de terceiros. O artefato é **deliberadamente não instalável**: sem loader Canon, handoff de firmware e procedimento de recuperação comprovado. Preserva-se a decisão de reuso seletivo e atribuição GPLv2, sem copiar rotinas inseguras de boot sem análise.
