@@ -1,0 +1,37 @@
+name: Candidato de boot 5D Classic (NAO HOMOLOGADO)
+
+on:
+  push:
+    branches: [experimental/5dc-boot-probe]
+  pull_request:
+    paths:
+      - 'camera/5DC.111/boot-probe/**'
+      - '.github/workflows/5dc-boot-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cross-compile-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar ferramentas ARM offline
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm lld binutils
+          clang --version | head -n 1
+          llvm-objcopy --version | head -n 1
+      - name: Compilar payload ARM e executar testes offline
+        run: |
+          make -C camera/5DC.111/boot-probe clean all test
+          sha256sum camera/5DC.111/boot-probe/dist/SE.BIN
+      - name: Guardar artefato apenas para teste experimental
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebobina-5dc-boot-probe-NAO-HOMOLOGADO
+          path: |
+            camera/5DC.111/boot-probe/dist/SE.BIN
+            camera/5DC.111/boot-probe/dist/probe-manifest.json
+          retention-days: 30
+          if-no-files-found: error
