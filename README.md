@@ -31,6 +31,8 @@ The following components work **on the host computer**:
 
 **Not yet implemented on the camera:** a working Rebobina boot, physical LCD/buttons, a camera-side plugin loader, a validated FAT filesystem backend, or RAW sensor processing as an on-camera module.
 
+An **offline-only linked ARM stage0 ELF** is now available with `make offline-bootstrap`. It demonstrates an independent ARM entry and a link with the portable core, **not a Canon bootable program**: no Canon card-boot loader format, firmware handoff, or hardware recovery exists. Never rename or convert the ELF to `AUTOEXEC.BIN`. See [offline bootstrap study](docs/5DC-BOOTSTRAP-OFFLINE.md) (Portuguese).
+
 The automated CR2 integration tests use a **synthetic TIFF/CR2-like envelope**, not a real Canon photograph. The CR2 developer processes the **embedded JPEG preview, not Bayer RAW sensor data**. Real EOS 5D CR2 compatibility is not yet validated.
 
 ## Quick start (host development)
@@ -44,6 +46,7 @@ make test             # run C/Python tests, including HAL tests
 make check-modules    # validate JSON module manifests
 make audit-platform   # check the static EOS 5D platform inventory
 make arm-objects      # build ARM objects (NOT installable firmware)
+make offline-bootstrap # link ARM stage0 ELF for inspection ONLY (NOT camera bootable)
 make sim-ui           # simulate the interface in a terminal
 make web-sim          # start the visual simulator on localhost:8765
 make plugin-demo      # load a trusted Linux .so plugin

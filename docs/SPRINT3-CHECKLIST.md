@@ -1,6 +1,6 @@
 # Sprint 3 — Preparação para o primeiro boot Rebobina
 
-**Estado:** bloqueada para código experimental. A câmera real já está em firmware Canon **1.1.1**, com teste básico de JPEG/RAW e reinicialização **confirmado pelo usuário em 11/11/2026**. Ainda não há bootloader/linker homologado ou `AUTOEXEC.BIN` Rebobina. Leia [preflight Windows/CF](5DC-WINDOWS-PREFLIGHT.md).
+**Estado:** bloqueada para código experimental. A câmera real já está em firmware Canon **1.1.1**, com teste básico de JPEG/RAW e reinicialização **confirmado pelo usuário em 11/11/2026**. Há um **ELF ARM ligado apenas para inspeção offline** (`make offline-bootstrap`), mas **não** há carregador Canon, linker validado em hardware nem `AUTOEXEC.BIN` Rebobina. Leia [preflight Windows/CF](5DC-WINDOWS-PREFLIGHT.md).
 
 Este documento serve para evitar que a Sprint 3 seja declarada concluída apenas porque conseguimos compilar objetos ARM na Sprint 2.
 
@@ -14,6 +14,13 @@ Este documento serve para evitar que a Sprint 3 seja declarada concluída apenas
 - [ ] Build ARM do Boot Probe reproduzível (diferença histórica 500/504 bytes pendente).
 
 **Não executar a PR experimental #1 nem instalar Magic Lantern somente por causa da atualização do firmware.**
+
+## Marco da pesquisa de bootstrap (13/11/2026)
+
+- [x] Localizado port histórico Magic Lantern **5DC.111** com fonte específica VxWorks, commit fixado e créditos GPLv2.
+- [x] Criada entrada ARM e linked ELF **próprios do Rebobina**, sem depender da instalação ou de binários do Magic Lantern, com auditoria offline. Consulte [bootstrap offline](5DC-BOOTSTRAP-OFFLINE.md).
+- [ ] Demonstrar que a entrada e a RAM assumidas são apropriadas **ao loader Canon real**; o ELF offline **não é firmware instalável**.
+- [ ] Implementar boot, handoff para Canon e recuperação sem deixar o firmware congelado; não existem ainda.
 
 ## Condições mínimas antes de escrever código de boot
 

@@ -191,3 +191,7 @@ Não há promessa de compatibilidade com outros modelos. Cada adaptação futura
 O Rebobina não é afiliado à Canon nem à equipe Magic Lantern. Reconhecemos o trabalho da comunidade do [Magic Lantern](https://github.com/reticulatedpines/magiclantern_simplified) e dos autores do [Soup Engine](https://github.com/jiijii0/soup-engine). **O simulador, a HAL e o gerenciador host são implementações originais do Rebobina; o código do Soup Engine é baixado em uma cópia temporária externa para executar testes do upstream fixado. Nenhum código Soup foi incluído no firmware Rebobina.** A pesquisa de integração utiliza referências externas e mantém as obrigações GPLv2. Integrações futuras deverão respeitar direitos autorais, atribuições e licenças dos componentes reutilizados.
 
 Código original do Rebobina licenciado sob **GPL-2.0-only** — veja [LICENSE](LICENSE). Projeto experimental, **sem garantias**.
+
+## Protótipo de bootstrap próprio (13/11/2026)
+
+O código `camera/5DC.111/bootstrap/` já permite ligar uma **entrada ARM946E-S própria** ao núcleo do Rebobina e gerar `build/arm/5dc-stage0-offline.elf` com `make offline-bootstrap`, sem usar um executável Magic Lantern como base. **Esse ELF só serve para inspeção no computador:** não possui formato de inicialização Canon, handoff, fallback ou recuperação. **Não instalar ou converter para `AUTOEXEC.BIN`.** Consulte o [estudo e créditos GPLv2](docs/5DC-BOOTSTRAP-OFFLINE.md).
