@@ -19,7 +19,7 @@ O alvo `make offline-bootstrap` compila um **ELF32 ARM946E-S** com entrada `rb_s
 
 ## Comportamento real do protótipo
 
-1. O ELF declara uma entrada ARM `_rb` própria **`rb_stage0_entry`**, vinculada a `0x00980000` **exclusivamente como hipótese de link**.
+1. O ELF declara uma entrada ARM própria **`rb_stage0_entry`**, vinculada a `0x00980000` **exclusivamente como hipótese de link**.
 2. O assembly prepara a pilha de 4 KiB **em memória hipotética** e chama `rb_stage0_prepare`.
 3. A rotina C inicializa a área `.bss`, o registro de módulos e o modelo de interface do Rebobina.
 4. Executa uma verificação estrutural *sobre um descritor sintético* (5DC.111; 1.1.1; intervalo histórico); o resultado é `RB_STAGE0_RESEARCH_MATCH_ONLY`, **nunca autorização de boot**.
