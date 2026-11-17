@@ -4,7 +4,7 @@
 
 ## O que vamos demonstrar
 
-Executar código Rebobina no corpo da câmera **uma vez** e tentar gravar `A:/REBOBINA.TXT`. Se o arquivo existir e contiver `REBOBINA BOOT PROBE 0.0.1`, avançamos do simulador para a primeira evidência real de execução ARM. A ausência dele não prova que nada executou: o boot ou a escrita podem falhar.
+Executar código Rebobina no corpo da câmera **uma vez** e tentar gravar `A:/REBOBINA.TXT`. Se o arquivo existir e contiver `REBOBINA BOOT PROBE 0.0.2`, avançamos do simulador para a primeira evidência real de execução ARM. A ausência dele não prova que nada executou: o boot ou a escrita podem falhar.
 
 ## Você já concluiu
 
@@ -36,6 +36,12 @@ O firmware original da Canon não procura `AUTOEXEC.BIN` por padrão. Para a **p
 7. Com câmera **desligada**, copie o conteúdo da pasta `Rebobina-5DC-TESTE` para a **raiz do CF B já inicializável**, substituindo o `AUTOEXEC.BIN` e o `SE.BIN`. Mantenha o backup **do ML e do Soup no PC**, não no CF. Ejete com segurança.
 8. Ligue sem fotografar e observe se inicia e responde. Desligue, retire o CF B e procure na raiz dele `REBOBINA.TXT`; abra e confira o texto. Não tente novamente em loop se não funcionar.
 9. Se houver travamento ou comportamento inesperado, desligue, retire bateria e o CF de teste, recoloque a bateria e teste com o CF A original. Só volte ao CF B após restaurar um `AUTOEXEC.BIN` funcional, e nunca mantenha um CF inicializável sem esse arquivo.
+
+## Diagnóstico LED (v0.0.2)
+
+O probe experimental pisca o LED **azul** da 5D (Magic Lantern 5DC usava `0xC02200F0`) logo que entra. Uma piscada curta seguida de pausa confirma somente que **chegou na rotina**. O segundo padrão indica: **duas curtas**, falha ao criar o arquivo; **três curtas**, escrita falhou ou foi parcial; **uma longa**, ROM relatou escrita completa. A confirmação final exige encontrar `REBOBINA.TXT` na raiz do CF. Sem sinais, não assumir que o payload foi carregado. Nenhum desses indicadores foi ainda confirmado no corpo real.
+
+O ZIP distribuído anteriormente gerou 504 bytes no build local, enquanto o usuário observou um `SE.BIN` de **500 bytes** no CF em 16/11/2026. O arquivo de 500 bytes não foi autenticado por hash; a diferença é indício de builds distintas, não prova de defeito. A nova versão local tem 692 bytes (Clang 17), SHA-256 `03ef018753b512a911a339ab7bdae6675189dd949cc1b6952818518edfbf4eeb`. Confira o manifesto do pacote utilizado. Para este teste, **copie somente `SE.BIN` para o CF existente, não execute novo `.FIR` nem substitua `AUTOEXEC.BIN`**.
 
 ## Como interpretar o resultado
 

@@ -28,6 +28,8 @@ dist/SE.BIN: build/rebobina-probe.elf tools/validate_probe.py
 	$(PYTHON) tools/validate_probe.py --bin $@ --elf build/rebobina-probe.elf --manifest dist/probe-manifest.json
 
 test: dist/SE.BIN
+	$(CLANG) -std=c11 -Wall -Wextra -Werror -DRB_PROBE_HOST_TEST -o build/test_probe_diagnostics tests/test_probe_diagnostics.c boot/probe.c
+	./build/test_probe_diagnostics
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:

@@ -73,7 +73,7 @@ def main():
     if args.manifest:
         metadata = {
             'product': 'Rebobina — boot probe',
-            'version': '0.0.1',
+            'version': '0.0.2',
             'target': '5DC.111',
             'loader': 'patched Soup Engine 5D Classic AUTOEXEC.BIN',
             'sha256': info['sha256'],

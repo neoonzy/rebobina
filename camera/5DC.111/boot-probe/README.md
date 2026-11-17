@@ -1,4 +1,4 @@
-# Rebobina — Boot Probe 0.0.1 para Canon EOS 5D Classic
+# Rebobina — Boot Probe 0.0.2 para Canon EOS 5D Classic
 
 > [!CAUTION]
 > **CANDIDATO EXPERIMENTAL, NÃO VALIDADO EM CÂMERA FÍSICA.** Não é firmware para uso cotidiano, não fornece menu e não substitui o Magic Lantern de maneira independente. O uso pode congelar a câmera ou comprometer o cartão. Utilize apenas equipamento/cartão de teste, com backup e recuperação.
@@ -37,12 +37,18 @@ O script cria **somente** `dist/card-staging/` e `dist/staging-manifest.json` no
 
 **Se a verificação recusar o `AUTOEXEC.BIN`, interrompa o teste. Não contorne o bloqueio.**
 
+## Diagnóstico de inicialização (v0.0.2)
+
+O probe agora tenta acionar o **LED azul** usando o endereço histórico `0xC02200F0` (Magic Lantern 5DC): uma piscada rápida na entrada, uma pausa de 700ms e então **duas rápidas** se `FIO_CreateFile` falhar, **três rápidas** se `FIO_WriteFile` falhar ou escrever parcialmente, ou **uma longa (~900ms)** se a API relatar escrita completa. Os sinais ainda são hipótese e não foram medidos no hardware. Se o LED não piscar, a execução do payload não foi comprovada. O código não escreve bootflags.
+
+**Antes do primeiro teste, confirme que o `AUTOEXEC.BIN` é o loader modificado do Soup, não o Magic Lantern original.** Somente este último não carrega o `SE.BIN` do nosso probe. Nunca execute o instalador novamente só para trocar o `SE.BIN`.
+
 ## Teste físico — apenas quando houver condições de recuperação
 
 1. Confirme novamente **Canon 5D Classic firmware 1.1.1** e um CompactFlash de teste **já inicializável**. Guarde o original `AUTOEXEC.BIN` Magic Lantern e o `SE.BIN` do Soup fora do cartão.
 2. Com a câmera desligada, depois de o staging passar, copie o conteúdo de `dist/card-staging/` para o CF de teste. Não apague o `AUTOEXEC.BIN` do cartão inicializável.
 3. Ligue e observe. **Se houver travamento ou `Err`, desligue, retire a bateria e o CF e restaure a cópia original.** Não fotografe enquanto testa a inicialização.
-4. Desligue normalmente, remova o CF e verifique no computador se existe `REBOBINA.TXT` na raiz. Se contiver `REBOBINA BOOT PROBE 0.0.1`, o código Rebobina executou ao menos a rotina de gravação; isso **não prova estabilidade**.
+4. Desligue normalmente, remova o CF e verifique no computador se existe `REBOBINA.TXT` na raiz. Se contiver `REBOBINA BOOT PROBE 0.0.2`, o código Rebobina executou ao menos a rotina de gravação; isso **não prova estabilidade**.
 5. Para restaurar o Magic Lantern, recopie seu `AUTOEXEC.BIN` original; para restaurar o Soup Engine, recopie o `SE.BIN` original do pacote Soup.
 
 > [!WARNING]
@@ -56,7 +62,7 @@ Linux com Clang, LLD, `llvm-objcopy`, `readelf`, Python 3.9+:
 make clean all test
 ```
 
-O processo gera `dist/SE.BIN` e `dist/probe-manifest.json`. Um build de referência produziu 504 bytes e SHA-256 `f50b41ef6d70be894117277a8f7c1984e571ddc2a10ff471b0371805e81a8834`. Foram aprovados **10 testes Python locais** com arquivos sintéticos. Isso **não** testa o bootloader, VxWorks, chamadas da ROM ou hardware.
+O processo gera `dist/SE.BIN` e `dist/probe-manifest.json`. Um build local de referência em Clang 17 produziu **692 bytes**, SHA-256 `03ef018753b512a911a339ab7bdae6675189dd949cc1b6952818518edfbf4eeb`. Toolchains podem gerar bytes diferentes; confira sempre o SHA-256 do manifesto do próprio build. Foram aprovados **10 testes Python e testes C de injeção de falhas** com arquivos sintéticos. Isso **não** testa o bootloader, VxWorks, chamadas da ROM ou hardware.
 
 Este protótipo é um **marco de integração experimental**, não o Rebobina final. O próximo passo é validar o boot em câmera de desenvolvimento e então implementar interface e módulos com recursos do próprio Rebobina.
 
