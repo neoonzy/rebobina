@@ -1,0 +1,12 @@
+{
+  "sha256": "ac7b38058c68b0944422ee1dc8cdb3a6f605fdb172ab51747f0a5f22a118c7e0",
+  "size": 28416,
+  "entry_offset": 4944,
+  "key_offset": 500,
+  "product": "REBOBINA 5DC integrated developer preview",
+  "version": "0.1.0-dev",
+  "target": "5DC.111",
+  "loader": "Soup Engine 5DC patched AUTOEXEC.BIN",
+  "tested_on_hardware": false,
+  "modifies_autoexec": false
+}
