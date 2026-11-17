@@ -1,0 +1,33 @@
+name: REBOBINA 5DC 0.0.3 diagnostic build (offline)
+on:
+  push:
+    paths:
+      - 'camera/5DC.111/diagnostic-003/**'
+      - '.github/workflows/5dc-diag-003.yml'
+  pull_request:
+    paths:
+      - 'camera/5DC.111/diagnostic-003/**'
+      - '.github/workflows/5dc-diag-003.yml'
+  workflow_dispatch:
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install compiler and inspectors
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld llvm binutils zip
+      - name: Build ARM diagnostic and run host tests
+        run: make -C camera/5DC.111/diagnostic-003 clean all test
+      - name: Package candidate (never install automatically)
+        run: |
+          cd camera/5DC.111/diagnostic-003
+          zip -q -r ../../../rebobina-5dc-003-offline.zip README.md Makefile boot tools tests dist/SE.BIN dist/manifest.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rebobina-5dc-003-NAO-HOMOLOGADO
+          path: rebobina-5dc-003-offline.zip
+          if-no-files-found: error
