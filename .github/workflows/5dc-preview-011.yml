@@ -1,0 +1,34 @@
+name: REBOBINA 5DC integrated developer preview 0.1.1
+on:
+  push:
+    paths:
+      - 'camera/5DC.111/preview-011/**'
+      - '.github/workflows/5dc-preview-011.yml'
+  pull_request:
+    paths:
+      - 'camera/5DC.111/preview-011/**'
+      - '.github/workflows/5dc-preview-011.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cross-toolchain and inspectors
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld llvm binutils zip
+      - name: Compile ARM, validate and test host
+        run: make -C camera/5DC.111/preview-011 clean all test
+      - name: Prepare complete test ZIP (does NOT modify CF)
+        run: |
+          cd camera/5DC.111/preview-011
+          zip -q -r ../../../rebobina-5dc-0.1.1-dev.zip \
+            README.md CHANGELOG.md Makefile boot core include tools tests dist/SE.BIN dist/manifest.json FULL-UI/ML/RB6UI.ON FULL-UI/ML/RB6FOCUS.ON
+      - uses: actions/upload-artifact@v4
+        with:
+          name: REBOBINA-5DC-0.1.1-dev-NOT-HARDWARE-VALIDATED
+          path: rebobina-5dc-0.1.1-dev.zip
+          if-no-files-found: error
