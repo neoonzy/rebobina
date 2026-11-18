@@ -13,7 +13,7 @@ try {
     [Text.Encoding]::ASCII.GetBytes('gaonisoy').CopyTo($loader,4)
     [BitConverter]::GetBytes([uint32]0x00980850).CopyTo($loader,(At 0x00980774))
     $disp=[long]((0x00980850 - (0x00989DB4+8)) / 4)
-    $branch=[uint32](([long]0xEB000000 -bor ($disp -band 0x00FFFFFF)))
+    $branch=[uint32](([long]3942645760 -bor ($disp -band 0x00FFFFFF)))
     [BitConverter]::GetBytes($branch).CopyTo($loader,(At 0x00989DB4))
     [Text.Encoding]::ASCII.GetBytes('A:/SE.BIN').CopyTo($loader,((At 0x00980820)+64))
     [IO.File]::WriteAllBytes((Join-Path $card 'AUTOEXEC.BIN'),$loader)
