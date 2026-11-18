@@ -46,7 +46,7 @@ int rb_hal_open(const char *path){
 }
 int rb_hal_create(const char *path){
  if(write_fail)return -1;
- assert(strstr(path,"A:/RB8") || strstr(path,"A:/ML/RB8CFG"));
+ assert(strstr(path,"A:/RB9") || strstr(path,"A:/ML/RB8CFG"));
  return get(path);
 }
 int rb_hal_write(int h,const void *p,unsigned n){
