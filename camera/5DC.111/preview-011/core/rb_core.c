@@ -22,7 +22,9 @@ static volatile struct rb_state {
     uint32_t focus_enabled, focus_want, focus_active, focus_consumed, focus_exits;
     uint32_t fill_calls, bitmap_samples;
     struct rb_event events[RB_EVENTS];
-} state = { RB_MAGIC, 0xffffffffu, 0, 0, 0xffffffffu, 0, 0, 0, {{0xffffffffu,0xffffffffu}} };
+} state = { .magic = RB_MAGIC, .count = 0xffffffffu,
+            .last_param = 0xffffffffu,
+            .events = {{0xffffffffu,0xffffffffu}} };
 
 /* Allocate initialized .data: the Soup legacy loader does not clear .bss.
  * Separate, never-reused write buffers protect FIO's asynchronous DMA path.
