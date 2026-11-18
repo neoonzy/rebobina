@@ -6,7 +6,7 @@ Este roadmap apresenta as etapas amplas. A divisão operacional em ciclos, taref
 
 As etapas diferenciam protótipo host, simulação e firmware experimental. Nada neste repositório está pronto para instalação em câmera.
 
-**Estado atual:** fundação host concluída; investigação da 5D Classic em andamento; compilação de objetos ARM, simulador visual web conectado ao C e gerenciador host de módulos. Sem leitor CF e com o corpo real ainda em firmware 1.1.0, **não houve boot físico do Rebobina**. Consulte [o plano de desenvolvimento paralelo](SPRINT-SEM-CF.md).
+**Estado em 18/11/2026:** o corpo EOS 5D Classic 1.1.1 executou payloads Rebobina pelo carregador Soup e mostrou interface própria em todo o LCD na 0.1.2. O primeiro [beta interativo 0.2.0](../camera/5DC.111/beta-020/README.md), com configuração e caderno persistentes, foi compilado/testado no host e aguarda validação física. A etapa de motor fotográfico Soup na câmera e bootstrap independente permanece aberta.
 
 ## Etapa 0 — Fundação
 
@@ -30,17 +30,17 @@ As etapas diferenciam protótipo host, simulação e firmware experimental. Nada
 
 ## Etapa 2 — Primeiro Rebobina embarcado
 
-- [ ] Criar build ARM específico da 5D Classic;
+- [x] Criar build ARM específico da 5D Classic via carregador legado Soup;
 - [ ] Integrar com o boot e com o ambiente Canon sem alterar a ROM;
 - [ ] Inicializar um serviço mínimo e reportar diagnóstico no equipamento;
-- [ ] Implementar HAL inicial com interface, tarefas, arquivos e memória;
+- [x] Implementar HAL inicial com interface, tarefas, arquivos e memória, comprovada até 0.1.2;
 - [ ] Testar em simulador e depois numa câmera de desenvolvimento, com recuperação documentada.
 
 **Entrega:** primeiro executável experimental Rebobina que inicializa e encerra de forma controlada. Não é um release para usuários finais.
 
 ## Etapa 3 — Interface e sistema de módulos
 
-- [ ] Implementar interface Rebobina na tela da câmera;
+- [x] Implementar primeira interface Rebobina na tela da câmera (texto e tela cheia observados até 0.1.2; beta UX em validação);
 - [ ] Definir ABI embarcada e carregador versionado de módulos;
 - [ ] Resolver dependências, compatibilidade e ativação/desativação;
 - [ ] Garantir limites de memória, logs e tratamento de falhas conforme a plataforma;
