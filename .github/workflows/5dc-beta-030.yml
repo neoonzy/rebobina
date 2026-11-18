@@ -50,3 +50,8 @@ jobs:
             if ($errors.Count -ne 0) { $errors | ForEach-Object { Write-Error $_ }; exit 1 }
           }
           Write-Host 'PowerShell scripts syntax OK'
+      - name: Simulate install and rollback on a fake CF
+        shell: pwsh
+        run: |
+          & ./camera/5DC.111/beta-030/tests/windows-install-smoke.ps1
+
