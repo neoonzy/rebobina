@@ -46,7 +46,7 @@ int rb_hal_open(const char *path){
 }
 int rb_hal_create(const char *path){
  if(write_fail)return -1;
- assert(strstr(path,"A:/RB9") || strstr(path,"A:/ML/RB8CFG"));
+ assert(strstr(path,"A:/RB9") || strstr(path,"A:/ML/RB9CFG"));
  return get(path);
 }
 int rb_hal_write(int h,const void *p,unsigned n){
@@ -115,7 +115,7 @@ static void test_ui_and_persistence(void){
  assert(event(1)==0);assert(event(1)==0);assert(event(1)==0); /* SAVE */
  assert(event(2)==0); /* trigger config and report */
  rb_test_worker_step();
- ix=find("A:/ML/RB8CFG1.BIN");assert(ix>=0 && files[ix].len==36);
+ ix=find("A:/ML/RB9CFG1.BIN");assert(ix>=0 && files[ix].len==36);
  assert(strstr(txt("A:/RB9SESSION.TXT"),"FILM_INDEX_HEX=00000001"));
  assert(strstr(txt("A:/RB9SESSION.TXT"),"MANUAL_FRAMES_HEX=00000002"));
  assert(strstr(txt("A:/RB9SESSION.TXT"),"CONFIG_SEQUENCE_HEX=00000001"));
@@ -145,7 +145,7 @@ static void test_slot_recovery_and_faults(void){
  assert(event(2)==0); /* enter TOOLS */
  assert(event(1)==0);assert(event(1)==0); /* SALVAR */
  assert(event(2)==0);rb_test_worker_step();
- i=find("A:/ML/RB8CFG0.BIN");assert(i>=0);
+ i=find("A:/ML/RB9CFG0.BIN");assert(i>=0);
  /* Damage most recent slot; next boot must fallback to previous valid. */
  files[i].data[12]^=0x01;
  rb_boot();rb_test_worker_init();rb_test_worker_step();
@@ -156,8 +156,31 @@ static void test_slot_recovery_and_faults(void){
  assert(event(1)==0);assert(event(1)==0);assert(event(2)==0); /* TOOLS */
  assert(event(1)==0);assert(event(1)==0);assert(event(2)==0); /* save */
  rb_test_worker_step();write_fail=0;
- assert(find("A:/ML/RB8CFG1.BIN")>=0);
+ assert(find("A:/ML/RB9CFG1.BIN")>=0);
  puts("PASS dual-slot fallback / corrupt record rejection / fail-closed write");
+}
+static void test_legacy_config_import(void){
+ int idx;
+ reset_all();beta_marker=1;display=bitmap=1;
+ start();rb_test_worker_step();
+ assert(event(2)==0); /* HOME->FILM */
+ assert(event(1)==0);assert(event(2)==0); /* PORTRA */
+ assert(event(3)==0); /* home */
+ assert(event(1)==0);assert(event(1)==0); /* tools */
+ assert(event(2)==0);assert(event(1)==0);assert(event(1)==0);
+ assert(event(2)==0);rb_test_worker_step(); /* save new slot */
+ idx=find("A:/ML/RB9CFG1.BIN");assert(idx>=0);
+ /* Move new record to legacy name, simulating an older 0.2 CF. */
+ strncpy(files[idx].name,"A:/ML/RB8CFG1.BIN",sizeof(files[idx].name)-1u);
+ rb_boot();rb_test_worker_init();rb_test_worker_step();
+ assert(event(2)==0); /* existing FILM selection should import */
+ assert(event(3)==0);
+ assert(event(1)==0);assert(event(1)==0);assert(event(2)==0);
+ assert(event(1)==0);assert(event(1)==0);assert(event(2)==0);
+ rb_test_worker_step();
+ assert(find("A:/ML/RB8CFG1.BIN")>=0); /* legacy still intact */
+ assert(find("A:/ML/RB9CFG1.BIN")>=0); /* new save separate */
+ puts("PASS legacy RB8 import, new RB9 save, rollback-safe isolation");
 }
 static void test_legacy_menu_prevention(void){
  reset_all();beta_marker=1;start();
@@ -187,6 +210,6 @@ static void test_no_draw_when_dark(void){
 }
 int main(void){
  test_headless_and_setup();test_ui_and_persistence();
- test_slot_recovery_and_faults();test_legacy_menu_prevention();test_film_scroll();test_no_draw_when_dark();
+ test_slot_recovery_and_faults();test_legacy_config_import();test_legacy_menu_prevention();test_film_scroll();test_no_draw_when_dark();
  puts("ALL HOST TESTS PASSED");return 0;
 }

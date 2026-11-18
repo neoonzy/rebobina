@@ -35,3 +35,7 @@ Este instalador é uma **atualização compatível** para a câmera de desenvolv
 Há base técnica e testes físicos para o payload REBOBINA, mas **não** para chamar a cadeia de boot de independente. O código do Magic Lantern/Soup é licenciado em GPLv2, com atribuições obrigatórias.
 
 Referências: https://github.com/jiijii0/soup-engine/tree/master/Canon-EOS-5D e pesquisa do projeto em docs/5DC-BOOT-CHAIN.md e docs/5DC-BOOTSTRAP-OFFLINE.md.
+
+## Politica de migracao de preferencias
+
+RB8CFG0/1 permanecem intocados como legado da 0.2. A 0.3 usa RB9CFG0/1 e importa RB8 somente quando nao ha RB9 validos. O script de preflight faz backup de ambos os conjuntos. Restaurar o SE.BIN da 0.2 recarrega RB8, que pode estar desatualizado, mas nao e corrompido por indices de filme novos.

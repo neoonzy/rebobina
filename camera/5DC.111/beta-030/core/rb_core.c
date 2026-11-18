@@ -147,10 +147,13 @@ static int valid_config(const struct rb_config *c){
    c->sum==sum_words(c);
 }
 static const char *cfg_path(unsigned slot){
+ return slot?"A:/ML/RB9CFG1.BIN":"A:/ML/RB9CFG0.BIN";
+}
+static const char *legacy_cfg_path(unsigned slot){
  return slot?"A:/ML/RB8CFG1.BIN":"A:/ML/RB8CFG0.BIN";
 }
-static int read_config(unsigned slot,struct rb_config *out){
- int h=rb_hal_open(cfg_path(slot)),len;
+static int read_config(unsigned slot,struct rb_config *out,int legacy){
+ int h=rb_hal_open(legacy?legacy_cfg_path(slot):cfg_path(slot)),len;
  volatile uint8_t *src;uint8_t *dst;unsigned i;
  if(h<0)return 0;
  src=(volatile uint8_t*)rb_hal_uncached(cfg_read_raw[slot]);
@@ -162,14 +165,24 @@ static int read_config(unsigned slot,struct rb_config *out){
  return valid_config(out);
 }
 static void load_config(void){
- struct rb_config a,b;int ok0=read_config(0u,&a),ok1=read_config(1u,&b);
+ struct rb_config a,b;
+ int ok0=read_config(0u,&a,0),ok1=read_config(1u,&b,0);
+ int from_legacy=0;
  const struct rb_config *selected=0;
+ /* Import from 0.2 but NEVER overwrite its RB8CFG files: rollback
+  * to the older binary must remain possible, even after index 4..12. */
+ if(!ok0 && !ok1){
+  ok0=read_config(0u,&a,1);
+  ok1=read_config(1u,&b,1);
+  from_legacy=1;
+ }
  if(ok0 && ok1)selected=((int32_t)(b.sequence-a.sequence)>0)?&b:&a;
  else if(ok0)selected=&a;else if(ok1)selected=&b;
  if(selected){
   g.film=selected->film;g.roll=selected->roll;g.frames=selected->frames;
   g.modules=selected->modules;g.flags=selected->flags;
-  g.config_seq=selected->sequence;g.saved_slot=(selected==&a)?0u:1u;
+  g.config_seq=from_legacy?0u:selected->sequence;
+  g.saved_slot=from_legacy?0xffffffffu:((selected==&a)?0u:1u);
   g.config_status=1u;g.status=RB_STATUS_LOADED;
  }else{g.config_seq=0u;g.saved_slot=0xffffffffu;g.config_status=0u;g.status=RB_STATUS_NO_CONFIG;}
  g.menu_want=!!(g.flags&RB_FLAG_START_OPEN);

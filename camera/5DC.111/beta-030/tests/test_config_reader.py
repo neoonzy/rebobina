@@ -33,6 +33,16 @@ class TestConfigReader(unittest.TestCase):
             self.assertEqual(read_latest(root)['profile'],'ACROS')
             (root/'ML'/'RB8CFG1.BIN').write_bytes(b'bad')
             self.assertEqual(read_latest(root)['profile'],'SOUP 800')
+    def test_prefers_v03_and_preserves_v02(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);(root/'ML').mkdir()
+            old=root/'ML'/'RB8CFG1.BIN'
+            old.write_bytes(record(5,film=1))
+            (root/'ML'/'RB9CFG1.BIN').write_bytes(record(1,film=12))
+            self.assertEqual(read_latest(root)['stock_file'],'velvia.fs')
+            self.assertEqual(old.read_bytes(),record(5,film=1))
+            (root/'ML'/'RB9CFG1.BIN').write_bytes(b'corrupt')
+            self.assertEqual(read_latest(root)['stock_file'],'portra.fs')
     def test_host_adapter_doesnt_overwrite(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);card=root/'card';(card/'ML').mkdir(parents=True)

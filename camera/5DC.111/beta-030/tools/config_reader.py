@@ -43,25 +43,29 @@ def parse_config(data: bytes) -> dict | None:
 
 def read_latest(card_root: Path) -> dict | None:
     """Card root containing an ML directory; returns newest *valid* slot."""
-    found = []
-    for slot in (0, 1):
-        path = card_root / 'ML' / f'RB8CFG{slot}.BIN'
-        if path.is_file():
-            try:
-                parsed = parse_config(path.read_bytes())
-            except OSError:
-                parsed = None
-            if parsed is not None:
-                parsed['slot'] = slot
-                found.append(parsed)
-    if not found:
-        return None
-    if len(found) == 1:
-        return found[0]
-    a, b = found
-    # Match ARM signed wrap-aware seq delta; most recently written record wins.
-    delta = (b['sequence'] - a['sequence']) & 0xffffffff
-    return b if delta != 0 and delta < 0x80000000 else a
+    # Prefer the new RB9 slots. Fall back to legacy RB8 in a migration.
+    # Keeping the old files intact lets the 0.2 binary load its own state.
+    for prefix in ('RB9CFG', 'RB8CFG'):
+        found = []
+        for slot in (0, 1):
+            path = card_root / 'ML' / f'{prefix}{slot}.BIN'
+            if path.is_file():
+                try:
+                    parsed = parse_config(path.read_bytes())
+                except OSError:
+                    parsed = None
+                if parsed is not None:
+                    parsed['slot'] = slot
+                    parsed['source'] = prefix
+                    found.append(parsed)
+        if not found:
+            continue
+        if len(found) == 1:
+            return found[0]
+        a, b = found
+        delta = (b['sequence'] - a['sequence']) & 0xffffffff
+        return b if delta != 0 and delta < 0x80000000 else a
+    return None
 
 
 def main() -> int:

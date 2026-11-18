@@ -66,7 +66,7 @@ if(-not $Headless) {
  [IO.File]::WriteAllBytes((Join-Path $ml 'RB9BETA.ON'), [byte[]]@(49))
 }
 # Back up existing beta settings as well, without touching the card.
-foreach($name in @('RB8CFG0.BIN','RB8CFG1.BIN')) {
+foreach($name in @('RB8CFG0.BIN','RB8CFG1.BIN','RB9CFG0.BIN','RB9CFG1.BIN')) {
  $source=Join-Path $card (Join-Path 'ML' $name)
  if(Test-Path -LiteralPath $source -PathType Leaf) {
   Copy-Item -LiteralPath $source -Destination (Join-Path $backup $name)
