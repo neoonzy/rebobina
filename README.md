@@ -11,11 +11,14 @@ The long-term goal is to provide our own camera interface, photographic tools, a
 Rebobina is **not** a Magic Lantern installer or a plugin manager for an existing Magic Lantern installation. The intended program would launch from a prepared CompactFlash card alongside Canon's running firmware, without replacing the firmware stored in ROM. An optional installation assistant could come later.
 
 > [!IMPORTANT]
-> **Experimental project — not ready for use on a camera.**
+> **On-camera proofs confirmed; new interactive beta remains experimental.**
 >
-> Rebobina currently runs **only in development environments on a computer**. It has **not booted on a Canon EOS 5D Classic**. There is no validated on-camera interface, ARM module loader, or installable release. Do **not** copy host executables, experimental files, or ARM object files to your CompactFlash card. Passing host tests does **not** demonstrate hardware safety.
+> On the original Canon EOS 5D Classic 1.1.1, the author confirmed physical execution through the **legacy Soup Engine loader**, CompactFlash I/O, memory, buttons, and visible full-height LCD rendering up to REBOBINA **0.1.2-dev**. The **0.2.0-beta candidate is compiled and host-tested but not yet camera-validated**. It introduces a persistent 10 Hz menu, manual roll journal and dual-slot CF configuration. **Soup photo processing remains host-only**; the camera-side module loader and independent boot chain do not exist yet. See [the beta guide](camera/5DC.111/beta-020/README.md) and use a spare CF with backup.
 
 ## Current status
+
+**New camera-side implementation:** [REBOBINA 0.2.0-beta](camera/5DC.111/beta-020/README.md) — ARM `SE.BIN` via existing Soup/ML loader, 10 Hz LCD menu, saved film/roll selection, static services and diagnostics. The user's 0.1.2 LCD observation is documented; the new beta awaits its own physical test. Host tools below remain separate.
+
 
 The following components work **on the host computer**:
 
@@ -26,10 +29,10 @@ The following components work **on the host computer**:
 - **Protected output:** temporary-file staging, synchronization, and exclusive publication without overwriting an existing destination. A separate **Linux-only** backend supports actual host files.
 - **Soup Engine integration tests:** a pinned upstream source revision with 13 self-tests, synthetic JPEG/film-look processing, and sanitizer checks.
 - **CR2 preview tools:** read-only inspection and a Linux utility that applies Soup Engine film profiles to the **embedded JPEG preview** in a CR2, producing a separate JPEG.
-- **ARM946E-S toolchain checks:** relocatable ARM object files are built and validated. **They are not executable camera firmware.**
+- **ARM946E-S builds:** besides offline-only research objects, an experimental camera-loadable `SE.BIN` is now compiled and validated structurally at `camera/5DC.111/beta-020/`. It runs through the legacy loader, not a standalone Canon installer.
 - **Automated testing:** C and Python tests, GitHub Actions, and host-side sanitizer builds.
 
-**Not yet implemented on the camera:** a working Rebobina boot, physical LCD/buttons, a camera-side plugin loader, a validated FAT filesystem backend, or RAW sensor processing as an on-camera module.
+**Still unavailable on-camera:** independent Rebobina boot, dynamically loaded plugins, photo-processing Soup/CR2, validated power-loss recovery and a full camera-independent display plane. **Already observed physically:** Soup-loaded Rebobina, GUI button events, CF and RAM services, LCD text and full-screen fill.
 
 A **5DC.111 boot-chain research audit and fail-closed preflight** now distinguish the historical installer load address (`0x00800000`) from the Magic Lantern relocated runtime (`0x00980000`). A mock Canon-continuation test verifies host-only fault paths, **not real firmware handoff**. See [5DC boot-chain research](docs/5DC-BOOT-CHAIN.md).
 
@@ -143,7 +146,7 @@ We intend to learn from and properly credit Magic Lantern's existing module syst
 include/rebobina/       Experimental C APIs for modules, HAL, and output
 src/core/               Portable module registry, UI, and output logic
 src/host/               Linux demos, simulators, CR2 tools, and HAL backends
-camera/5DC.111/         Camera research and experimental ARM stubs
+camera/5DC.111/         ARM camera payloads (beta-020) plus research, loaders and earlier hardware proofs
 modules/hello/          Example host module
 modules/soup-engine/    Planned Soup integration manifest
 simulator/web/          Local browser interface (HTML/CSS/JavaScript)
@@ -158,9 +161,9 @@ docs/                   Architecture, safety, roadmap, and research notes
 - **Sprint 1 — Reverse engineering:** ongoing; the exact historical Magic Lantern bootstrap binary/source and reference hashes for the EOS 5D Classic still need verification.
 - **Sprint 2 — Toolchain and simulation:** host simulators, HAL mocks, and relocatable ARM objects. No camera executable.
 - **Sprints 4–7 — Early host proofs:** interface, module lifecycle, Soup Engine JPEG preview development, and reliability testing. Hardware acceptance criteria remain open.
-- **Sprint 3 — First controlled camera boot:** **not yet tested or validated**.
+- **Sprint 3 — First controlled camera boot:** completed via the historical Soup loader; independent Rebobina boot still planned. Camera-side interactive beta is pending validation.
 
-The physical test camera was last reported to run **Canon firmware 1.1.0**, while the experimental target is **1.1.1**. A CF reader, verified firmware-update provenance, a validated bootstrap, and a recovery plan are needed before a physical boot test. The host processing pipeline also needs a much smaller memory footprint and a verified VxWorks/FAT backend before any camera-side port.
+The developer has since run camera-side Rebobina probes on **Canon EOS 5D Classic 1.1.1**. The loader and LCD/CF/button interfaces were demonstrated on a spare CF. The independent loader and on-camera Soup image engine still require real porting and staged verification.
 
 ## Initial target hardware
 
@@ -171,7 +174,7 @@ The physical test camera was last reported to run **Canon firmware 1.1.0**, whil
 | Platform | VxWorks / DIGIC II |
 | Historical reference | Magic Lantern support for the original EOS 5D |
 | Planned first camera module | Soup Engine |
-| Current camera support | **None; host prototype only** |
+| Current camera support | **Experimental Soup-loaded Rebobina beta**, EOS 5D Classic 1.1.1 only; 0.2.0-beta not hardware-validated |
 
 No compatibility with other camera models is promised. Every new port will require separate research and physical validation.
 

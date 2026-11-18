@@ -9,7 +9,7 @@ O **Rebobina será um programa próprio, executado na câmera**, desenvolvido a 
 **O produto principal não é um instalador do Magic Lantern nem um gerenciador de plugins para o Magic Lantern existente.** O Rebobina pretende executar no lugar da extensão Magic Lantern no cartão, preservando o firmware Canon na ROM. Um eventual instalador será somente uma ferramenta auxiliar. A decisão sobre quais partes do Magic Lantern serão reutilizadas ou adaptadas depende da pesquisa da implementação para 5D Classic.
 
 > [!IMPORTANT]
-> **Estado: protótipo de arquitetura no computador.** O Rebobina **ainda não funciona na câmera**, não instala Magic Lantern, não modifica firmware/boot flags e não gera um `AUTOEXEC.BIN` utilizável. Nenhum binário do Soup Engine está integrado ou homologado. Não copie os executáveis deste repositório para o CompactFlash.
+> **Estado atualizado: provas reais na câmera; beta embarcado em desenvolvimento.** O autor confirmou que as versões até **0.1.2-dev** executaram na Canon EOS 5D Classic 1.1.1 pelo carregador legado Soup, gravaram arquivos, leram botões e desenharam conteúdo visível em toda a altura do LCD. A nova **0.2.0-beta** compila e passou nos testes do computador, mas **ainda não foi testada na câmera**. Não altera a ROM nem as bootflags e **não tem processador de CR2/Soup embarcado**. Use somente o CF de desenvolvimento com backup. Leia o [guia do beta](camera/5DC.111/beta-020/README.md).
 
 ## Desenvolvimento de JPEG a partir de CR2 — ferramenta Linux
 
@@ -100,7 +100,7 @@ O Magic Lantern já possui um sistema de módulos em várias versões. O Rebobin
 - Manifestos JSON validados por ferramenta Python, incluindo um *placeholder* do Soup Engine;
 - Testes do registro e dos manifestos, com CI no GitHub Actions.
 
-**Ainda não existe um executável embarcado do Rebobina:** não há inicialização própria na câmera, menu na câmera, carregador ARM de módulos, suporte a `.mo`, isolamento, instalação ou integração funcional com o Soup Engine. Há apenas carregamento experimental de `.so` no **Linux host**. Os manifestos descrevem intenções e compatibilidade planejada, não permissões efetivamente impostas.
+**O Rebobina já tem binário ARM embarcado via Soup e menu funcional observado na câmera**, além da nova 0.2.0-beta com caderno de rolos, módulos estáticos simples e configurações no CF (ainda não testada fisicamente). **Ainda faltam:** carregador independente, módulos binários `.mo`, isolamento, instalador e integração do motor fotográfico Soup na câmera. Os módulos `.so` continuam exclusivos do Linux host.
 
 ## Estrutura
 
@@ -119,7 +119,7 @@ docs/                 Arquitetura, segurança e roteiro
 
 ## Desenvolvimento atual e próximo marco
 
-A Sprint 0 foi concluída como fundação host e a Sprint 2 agora inclui o laboratório visual e o gerenciador de módulos host. A Sprint 1 permanece aberta por dependências históricas: já existe um mapa preliminar dos hooks, da ROM e da memória da EOS 5D Classic, mas o executável Magic Lantern 2012 de referência continua sem hash verificado. O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. Sem leitor CF e com a câmera ainda em firmware 1.1.0, o próximo passo é construir uma HAL simulada e integrar progressivamente o motor de processamento do Soup Engine, mantendo o primeiro boot físico bloqueado até a atualização e a validação da câmera 1.1.1. Um instalador desktop não é requisito para iniciar essa etapa.
+A Sprint 0 foi concluída como fundação host e a Sprint 2 agora inclui o laboratório visual e o gerenciador de módulos host. A Sprint 1 permanece aberta por dependências históricas: já existe um mapa preliminar dos hooks, da ROM e da memória da EOS 5D Classic, mas o executável Magic Lantern 2012 de referência continua sem hash verificado. O protótipo host foi criado para testar a API de módulos. **Ele não é o produto final**. O desenvolvedor já usou um CF de testes com a EOS 5D Classic 1.1.1 e confirmou boot e LCD do Rebobina via carregador Soup. A próxima etapa é portar de fato o processamento fotográfico Soup para uma API embarcada e consolidar a interface beta. Um instalador desktop não é requisito para iniciar essa etapa.
 
 ## Primeiros comandos
 

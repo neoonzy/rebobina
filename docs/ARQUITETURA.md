@@ -1,6 +1,6 @@
 # Arquitetura proposta
 
-> Documento de projeto. O núcleo embarcado, o carregador e a camada de hardware ainda **não existem** no código atual.
+> Documento de arquitetura histórica, atualizado em novembro de 2026: **o núcleo embarcado e uma HAL 5DC funcional já existem** em `camera/5DC.111/beta-020/`, executados pelo carregador legado Soup. O **bootstrap independente e o carregador dinâmico de módulos** ainda não existem. O motor de imagens Soup permanece apenas no host. Algumas descrições abaixo retratam o estado anterior aos testes reais; o [guia beta](../camera/5DC.111/beta-020/README.md) prevalece sobre elas.
 
 ## Objetivo
 
