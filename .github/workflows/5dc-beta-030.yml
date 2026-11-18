@@ -1,0 +1,57 @@
+name: REBOBINA 5DC 0.3.0 beta ARM build + tests
+on:
+  push:
+    paths:
+      - 'camera/5DC.111/beta-030/**'
+      - '.github/workflows/5dc-beta-030.yml'
+  pull_request:
+    paths:
+      - 'camera/5DC.111/beta-030/**'
+      - '.github/workflows/5dc-beta-030.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cross compiler and tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld llvm binutils zip
+      - name: Compile ARM + host tests
+        run: make -C camera/5DC.111/beta-030 clean all test
+      - name: Create downloadable beta package (not a camera installer)
+        run: |
+          cd camera/5DC.111/beta-030
+          zip -q -r ../../../REBOBINA-5DC-0.3.0-beta.zip \
+            README.md CHANGELOG.md LICENSE Makefile boot core include tools tests docs \
+            FULL-UI/ML/RB9BETA.ON dist/SE.BIN dist/manifest.json INSTALAR-REBOBINA.cmd RESTAURAR-REBOBINA.cmd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: REBOBINA-5DC-0.3.0-beta-CANDIDATE-NOT-HARDWARE-VALIDATED
+          path: REBOBINA-5DC-0.3.0-beta.zip
+          if-no-files-found: error
+
+  windows-powershell-syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Windows installer script parsing
+        shell: pwsh
+        run: |
+          $base = 'camera/5DC.111/beta-030/tools'
+          foreach ($name in @('install-rebobina.ps1','restore-rebobina.ps1','prepare-test.ps1')) {
+            $file = (Resolve-Path (Join-Path $base $name)).Path
+            $tokens = $null
+            $errors = $null
+            $null = [System.Management.Automation.Language.Parser]::ParseFile($file,[ref]$tokens,[ref]$errors)
+            if ($errors.Count -ne 0) { $errors | ForEach-Object { Write-Error $_ }; exit 1 }
+          }
+          Write-Host 'PowerShell scripts syntax OK'
+      - name: Simulate install and rollback on a fake CF
+        shell: pwsh
+        run: |
+          & ./camera/5DC.111/beta-030/tests/windows-install-smoke.ps1
+
