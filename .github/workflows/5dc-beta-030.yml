@@ -27,9 +27,26 @@ jobs:
           cd camera/5DC.111/beta-030
           zip -q -r ../../../REBOBINA-5DC-0.3.0-beta.zip \
             README.md CHANGELOG.md LICENSE Makefile boot core include tools tests docs \
-            FULL-UI/ML/RB9BETA.ON dist/SE.BIN dist/manifest.json
+            FULL-UI/ML/RB9BETA.ON dist/SE.BIN dist/manifest.json INSTALAR-REBOBINA.cmd RESTAURAR-REBOBINA.cmd
       - uses: actions/upload-artifact@v4
         with:
           name: REBOBINA-5DC-0.3.0-beta-CANDIDATE-NOT-HARDWARE-VALIDATED
           path: REBOBINA-5DC-0.3.0-beta.zip
           if-no-files-found: error
+
+  windows-powershell-syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Windows installer script parsing
+        shell: pwsh
+        run: |
+          $base = 'camera/5DC.111/beta-030/tools'
+          foreach ($name in @('install-rebobina.ps1','restore-rebobina.ps1','prepare-test.ps1')) {
+            $file = (Resolve-Path (Join-Path $base $name)).Path
+            $tokens = $null
+            $errors = $null
+            $null = [System.Management.Automation.Language.Parser]::ParseFile($file,[ref]$tokens,[ref]$errors)
+            if ($errors.Count -ne 0) { $errors | ForEach-Object { Write-Error $_ }; exit 1 }
+          }
+          Write-Host 'PowerShell scripts syntax OK'
